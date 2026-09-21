@@ -7,3 +7,6 @@ body {
 }
 button { font-family: inherit; }
 input, textarea { font-family: inherit; color: inherit; }
+.muted { color: var(--muted); }
+#auth { max-width: 320px; margin: 20vh auto; display: grid; gap: 0.5rem; }
+#account { display: flex; justify-content: space-between; align-items: center; }

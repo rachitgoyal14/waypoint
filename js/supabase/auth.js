@@ -5,7 +5,10 @@ export function session() {
 }
 
 export function signIn(email) {
-  return supabase.auth.signInWithOtp({ email });
+  return supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: location.origin },
+  });
 }
 
 export function signOut() {
