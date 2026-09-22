@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>waypoint</title>
+
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components/sidebar.css" />
+    <link rel="stylesheet" href="css/components/editor.css" />
+    <link rel="stylesheet" href="css/components/graph.css" />
+    <link rel="stylesheet" href="css/components/modals.css" />
+
+  </head>
+  <body>
+    <div id="auth"></div>
+    <div id="app" style="display: none">
+
+      <aside id="sidebar"></aside>
+
+      <main id="editor"></main>
+
+      <aside id="panel">
+        <svg id="graph"></svg>
+        <div id="backlinks"></div>
+      </aside>
+
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+    
+  </body>
+</html>
