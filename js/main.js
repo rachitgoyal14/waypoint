@@ -1,9 +1,13 @@
 import { isConfigured } from "./supabase/client.js";
 import { session, signIn, signOut, onAuthChange } from "./supabase/auth.js";
+import { listNotes } from "./supabase/notes.js";
+import { renderNotesList } from "./sidebar/notesList.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
 const app = qs("#app");
+let notes = [];
+let currentId = null;
 
 function form() {
   const input = el("input");
@@ -38,8 +42,29 @@ async function show(user) {
   const s = user !== undefined ? user : await session();
   authBox.style.display = s ? "none" : "block";
   app.style.display = s ? "grid" : "none";
-  if (s) account(s.user);
-  else form();
+  if (!s) {
+    form();
+    return;
+  }
+  account(s.user);
+  load();
+}
+
+async function load() {
+  const { data, error } = await listNotes();
+  if (error) {
+    qs("#sidebar").append(el("p", "muted", error.message));
+    return;
+  }
+  notes = data || [];
+  draw();
+}
+
+function draw() {
+  renderNotesList(qs("#sidebar"), notes, currentId, (id) => {
+    currentId = id;
+    draw();
+  });
 }
 
 onAuthChange((s) => show(s));
