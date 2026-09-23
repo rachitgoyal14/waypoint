@@ -1,6 +1,18 @@
 import { el } from "../utils/dom.js";
 
-export function renderNotesList(side, notes, activeId, onPick) {
+export function renderNotesList(side, notes, activeId, onPick, onNew, onDelete) {
+  let bar = side.querySelector("#notesbar");
+  if (!bar) {
+    bar = el("div");
+    bar.id = "notesbar";
+    side.append(bar);
+  }
+  const add = el("button", "", "New note");
+  add.onclick = onNew;
+  const del = el("button", "", "Delete");
+  del.disabled = !activeId;
+  del.onclick = onDelete;
+  bar.replaceChildren(add, del);
   let list = side.querySelector("#notes");
   if (!list) {
     list = el("div");

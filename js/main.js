@@ -1,6 +1,6 @@
 import { isConfigured } from "./supabase/client.js";
 import { session, signIn, signOut, onAuthChange } from "./supabase/auth.js";
-import { listNotes } from "./supabase/notes.js";
+import { listNotes, createNote, deleteNote } from "./supabase/notes.js";
 import { renderNotesList } from "./sidebar/notesList.js";
 import { qs, el } from "./utils/dom.js";
 
@@ -53,10 +53,43 @@ async function show(user) {
 async function load() {
   const { data, error } = await listNotes();
   if (error) {
-    qs("#sidebar").append(el("p", "muted", error.message));
+    fail(error.message);
     return;
   }
   notes = data || [];
+  draw();
+}
+
+function fail(message) {
+  let p = qs("#noteerror");
+  if (!p) {
+    p = el("p", "muted");
+    p.id = "noteerror";
+    qs("#sidebar").append(p);
+  }
+  p.textContent = message;
+}
+
+async function create() {
+  const { data, error } = await createNote("Untitled");
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  notes.unshift(data);
+  currentId = data.id;
+  draw();
+}
+
+async function remove() {
+  if (!currentId) return;
+  const { error } = await deleteNote(currentId);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  notes = notes.filter((n) => n.id !== currentId);
+  currentId = null;
   draw();
 }
 
@@ -64,7 +97,7 @@ function draw() {
   renderNotesList(qs("#sidebar"), notes, currentId, (id) => {
     currentId = id;
     draw();
-  });
+  }, create, remove);
 }
 
 onAuthChange((s) => show(s));
