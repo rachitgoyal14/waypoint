@@ -8,7 +8,8 @@ import {
   deleteFolder,
   moveNote,
 } from "./supabase/folders.js";
-import { renderNotesList } from "./sidebar/notesList.js";
+import { renderNotesBar } from "./sidebar/notesList.js";
+import { renderFolderTree } from "./sidebar/folderTree.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -69,16 +70,6 @@ async function load() {
   draw();
 }
 
-function fail(message) {
-  let p = qs("#noteerror");
-  if (!p) {
-    p = el("p", "muted");
-    p.id = "noteerror";
-    qs("#sidebar").append(p);
-  }
-  p.textContent = message;
-}
-
 async function loadFolders() {
   const { data, error } = await listFolders();
   if (error) {
@@ -89,14 +80,36 @@ async function loadFolders() {
   draw();
 }
 
-async function create() {
-  const { data, error } = await createNote("Untitled");
+function fail(message) {
+  let p = qs("#noteerror");
+  if (!p) {
+    p = el("p", "muted");
+    p.id = "noteerror";
+    qs("#sidebar").append(p);
+  }
+  p.textContent = message;
+}
+
+async function create(folderId = null) {
+  const { data, error } = await createNote("Untitled", folderId);
   if (error) {
     fail(error.message);
     return;
   }
   notes.unshift(data);
   currentId = data.id;
+  draw();
+}
+
+async function remove() {
+  if (!currentId) return;
+  const { error } = await deleteNote(currentId);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  notes = notes.filter((n) => n.id !== currentId);
+  currentId = null;
   draw();
 }
 
@@ -146,29 +159,23 @@ async function moveToFolder(noteId, folderId) {
   draw();
 }
 
-async function remove() {
-  if (!currentId) return;
-  const { error } = await deleteNote(currentId);
-  if (error) {
-    fail(error.message);
-    return;
-  }
-  notes = notes.filter((n) => n.id !== currentId);
-  currentId = null;
-  draw();
-}
-
 function draw() {
-  renderNotesList(qs("#sidebar"), notes, currentId, (id) => {
+  const side = qs("#sidebar");
+  renderNotesBar(side, currentId, {
+    onNew: () => create(null),
+    onNewFolder: addFolder,
+    onDelete: remove,
+  });
+  const tree = qs("#folders") || (() => {
+    const d = el("div");
+    d.id = "folders";
+    side.append(d);
+    return d;
+  })();
+  renderFolderTree(tree, folders, notes, currentId, (id) => {
     currentId = id;
     draw();
-  }, create, remove, {
-    folders,
-    onAddFolder: addFolder,
-    onRenameFolder: renameFolderById,
-    onDeleteFolder: removeFolder,
-    onMoveNote: moveToFolder,
-  });
+  }, (folderId) => create(folderId), renameFolderById, removeFolder, moveToFolder);
 }
 
 onAuthChange((s) => show(s));

@@ -2,13 +2,13 @@
   padding: 1rem;
 }
 
-#notes {
+#folders {
   display: grid;
   gap: 2px;
   margin-top: 1rem;
 }
 
-#notes button {
+#folders .folder-name {
   background: none;
   border: none;
   color: var(--text);
@@ -16,9 +16,103 @@
   padding: 0.4rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#notes button.active {
+#folders .folder-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+#folders .folder-head .chev {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.4rem 0.3rem;
+}
+
+#folders .folder-head .count {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+#folders .folder-head .mini {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+}
+
+#folders .folder-head .mini:hover {
+  color: var(--accent);
+}
+
+#folders .folder-body {
+  margin-left: 1rem;
+  display: grid;
+  gap: 2px;
+}
+
+#folders .folder-body.hidden {
+  display: none;
+}
+
+#folders .note-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+#folders .note-row.in-folder {
+  margin-left: 1rem;
+}
+
+#folders .note-row > button:first-child {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#folders .note-row > button.active {
+  color: var(--accent);
+}
+
+#folders .note-row .moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+#folders .note-row .move {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#folders .note-row .move:hover {
   color: var(--accent);
 }
 
@@ -41,36 +135,4 @@
 #notesbar button:disabled {
   color: var(--muted);
   cursor: default;
-}
-
-.note-row {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.note-row > button:first-child {
-  flex: 1;
-  min-width: 0;
-}
-
-.note-row .moves {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-}
-
-.note-row .move {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 0.7rem;
-  padding: 0.2rem 0.3rem;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.note-row .move:hover {
-  color: var(--accent);
 }
