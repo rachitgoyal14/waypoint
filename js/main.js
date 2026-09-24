@@ -1,12 +1,20 @@
 import { isConfigured } from "./supabase/client.js";
 import { session, signIn, signOut, onAuthChange } from "./supabase/auth.js";
 import { listNotes, createNote, deleteNote } from "./supabase/notes.js";
+import {
+  listFolders,
+  createFolder,
+  renameFolder,
+  deleteFolder,
+  moveNote,
+} from "./supabase/folders.js";
 import { renderNotesList } from "./sidebar/notesList.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
 const app = qs("#app");
 let notes = [];
+let folders = [];
 let currentId = null;
 
 function form() {
@@ -48,6 +56,7 @@ async function show(user) {
   }
   account(s.user);
   load();
+  loadFolders();
 }
 
 async function load() {
@@ -70,6 +79,16 @@ function fail(message) {
   p.textContent = message;
 }
 
+async function loadFolders() {
+  const { data, error } = await listFolders();
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  folders = data || [];
+  draw();
+}
+
 async function create() {
   const { data, error } = await createNote("Untitled");
   if (error) {
@@ -78,6 +97,52 @@ async function create() {
   }
   notes.unshift(data);
   currentId = data.id;
+  draw();
+}
+
+async function addFolder(parentId = null) {
+  const name = prompt("Folder name");
+  if (!name) return;
+  const { data, error } = await createFolder(name.trim(), parentId);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  folders.push(data);
+  draw();
+}
+
+async function renameFolderById(id) {
+  const folder = folders.find((f) => f.id === id);
+  const name = prompt("New name", folder ? folder.name : "");
+  if (!name) return;
+  const { error } = await renameFolder(id, name.trim());
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  folders = folders.map((f) => (f.id === id ? { ...f, name: name.trim() } : f));
+  draw();
+}
+
+async function removeFolder(id) {
+  const { error } = await deleteFolder(id);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  folders = folders.filter((f) => f.id !== id);
+  notes = notes.map((n) => (n.folder_id === id ? { ...n, folder_id: null } : n));
+  draw();
+}
+
+async function moveToFolder(noteId, folderId) {
+  const { error } = await moveNote(noteId, folderId);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  notes = notes.map((n) => (n.id === noteId ? { ...n, folder_id: folderId } : n));
   draw();
 }
 
@@ -97,7 +162,13 @@ function draw() {
   renderNotesList(qs("#sidebar"), notes, currentId, (id) => {
     currentId = id;
     draw();
-  }, create, remove);
+  }, create, remove, {
+    folders,
+    onAddFolder: addFolder,
+    onRenameFolder: renameFolderById,
+    onDeleteFolder: removeFolder,
+    onMoveNote: moveToFolder,
+  });
 }
 
 onAuthChange((s) => show(s));

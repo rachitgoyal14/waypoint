@@ -1,7 +1,76 @@
-#sidebar { padding: 1rem; }
-#notes { display: grid; gap: 2px; margin-top: 1rem; }
-#notes button { background: none; border: none; color: var(--text); text-align: left; padding: 0.4rem 0.5rem; border-radius: 4px; cursor: pointer; }
-#notes button.active { color: var(--accent); }
-#notesbar { display: flex; gap: 0.5rem; margin-top: 1rem; }
-#notesbar button { background: none; border: 1px solid var(--line); color: var(--text); padding: 0.4rem 0.5rem; border-radius: 4px; cursor: pointer; }
-#notesbar button:disabled { color: var(--muted); cursor: default; }
+#sidebar {
+  padding: 1rem;
+}
+
+#notes {
+  display: grid;
+  gap: 2px;
+  margin-top: 1rem;
+}
+
+#notes button {
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#notes button.active {
+  color: var(--accent);
+}
+
+#notesbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#notesbar button {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#notesbar button:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.note-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.note-row > button:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-row .moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.note-row .move {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.note-row .move:hover {
+  color: var(--accent);
+}
