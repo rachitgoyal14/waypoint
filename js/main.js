@@ -1,6 +1,6 @@
 import { isConfigured } from "./supabase/client.js";
 import { session, signIn, signOut, onAuthChange } from "./supabase/auth.js";
-import { listNotes, createNote, deleteNote } from "./supabase/notes.js";
+import { listNotes, createNote, deleteNote, saveNote } from "./supabase/notes.js";
 import {
   listFolders,
   createFolder,
@@ -10,6 +10,7 @@ import {
 } from "./supabase/folders.js";
 import { renderNotesBar } from "./sidebar/notesList.js";
 import { renderFolderTree } from "./sidebar/folderTree.js";
+import { initEditor } from "./editor/editor.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -17,6 +18,8 @@ const app = qs("#app");
 let notes = [];
 let folders = [];
 let currentId = null;
+let editor = null;
+let editorOpenId = null;
 
 function form() {
   const input = el("input");
@@ -56,8 +59,14 @@ async function show(user) {
     return;
   }
   account(s.user);
+  initEditorOnce();
   load();
   loadFolders();
+}
+
+function initEditorOnce() {
+  if (qs("#editorbar")) return;
+  editor = initEditor(qs("#editor"), { onSave: saveCurrent });
 }
 
 async function load() {
@@ -98,6 +107,33 @@ async function create(folderId = null) {
   }
   notes.unshift(data);
   currentId = data.id;
+  editorOpenId = data.id;
+  editor.open(data);
+  draw();
+}
+
+async function saveCurrent() {
+  if (!currentId) return false;
+  const title = editor.savedTitle();
+  const content = editor.savedBody();
+  const { error } = await saveNote(currentId, title, content);
+  if (error) {
+    fail(error.message);
+    return false;
+  }
+  notes = notes.map((n) => (n.id === currentId ? { ...n, title, content } : n));
+  draw();
+  return true;
+}
+
+async function openNote(id) {
+  if (id === currentId) return;
+  if (editor.isDirty() && !confirm("Discard unsaved changes?")) return;
+  const note = notes.find((n) => n.id === id);
+  if (!note) return;
+  currentId = id;
+  editorOpenId = id;
+  editor.open(note);
   draw();
 }
 
@@ -110,6 +146,8 @@ async function remove() {
   }
   notes = notes.filter((n) => n.id !== currentId);
   currentId = null;
+  editorOpenId = null;
+  editor.open(null);
   draw();
 }
 
@@ -173,8 +211,7 @@ function draw() {
     return d;
   })();
   renderFolderTree(tree, folders, notes, currentId, (id) => {
-    currentId = id;
-    draw();
+    openNote(id);
   }, (folderId) => create(folderId), renameFolderById, removeFolder, moveToFolder);
 }
 
