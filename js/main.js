@@ -67,6 +67,11 @@ async function show(user) {
 function initEditorOnce() {
   if (qs("#editorbar")) return;
   editor = initEditor(qs("#editor"), { onSave: saveCurrent });
+  window.addEventListener("beforeunload", (e) => {
+    if (!editor.isDirty()) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
 }
 
 async function load() {
@@ -128,7 +133,13 @@ async function saveCurrent() {
 
 async function openNote(id) {
   if (id === currentId) return;
-  if (editor.isDirty() && !confirm("Discard unsaved changes?")) return;
+  if (editor.isDirty()) {
+    const choice = confirm("Save changes before switching?\n\nOK = save and switch, Cancel = discard and switch.");
+    if (choice) {
+      const ok = await editor.flush();
+      if (!ok) return;
+    }
+  }
   const note = notes.find((n) => n.id === id);
   if (!note) return;
   currentId = id;

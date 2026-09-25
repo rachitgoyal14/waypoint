@@ -47,7 +47,7 @@ export function initEditor(root, { onLoadNote, onSave }) {
 
   save.onclick = doSave;
   document.addEventListener("keydown", (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
       e.preventDefault();
       doSave();
     }
@@ -59,8 +59,19 @@ export function initEditor(root, { onLoadNote, onSave }) {
     markClean();
   };
 
+  const flush = async () => {
+    if (!dirty()) return true;
+    return await onSave(title.value, body.value);
+  };
+
   bar.replaceChildren(status, save);
   root.replaceChildren(bar, title, body);
 
-  return { open, isDirty: dirty, savedTitle: () => title.value, savedBody: () => body.value };
+  return {
+    open,
+    flush,
+    isDirty: dirty,
+    savedTitle: () => title.value,
+    savedBody: () => body.value,
+  };
 }
