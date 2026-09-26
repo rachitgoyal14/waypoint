@@ -1,4 +1,5 @@
 import { el } from "../utils/dom.js";
+import { renderMarkdown } from "./markdown.js";
 
 export function initEditor(root, { onLoadNote, onSave }) {
   const bar = el("div");
@@ -16,6 +17,29 @@ export function initEditor(root, { onLoadNote, onSave }) {
   body.id = "body";
   body.placeholder = "Start writing… ([[link]], #tag, ==mark==)";
 
+  const preview = el("div");
+  preview.id = "preview";
+  let previewOn = false;
+
+  const drawPreview = () => {
+    if (!previewOn) return;
+    preview.replaceChildren(renderMarkdown(body.value));
+  };
+
+  body.oninput = () => {
+    markDirty();
+    drawPreview();
+  };
+
+  const toggle = el("button", "", "Preview");
+  toggle.onclick = () => {
+    previewOn = !previewOn;
+    toggle.textContent = previewOn ? "Edit" : "Preview";
+    preview.classList.toggle("on");
+    body.classList.toggle("hidden");
+    drawPreview();
+  };
+
   const dirty = () => save.disabled === false;
 
   const markDirty = () => {
@@ -30,7 +54,6 @@ export function initEditor(root, { onLoadNote, onSave }) {
   };
 
   title.oninput = markDirty;
-  body.oninput = markDirty;
 
   const doSave = async () => {
     if (!dirty()) return;
@@ -56,6 +79,7 @@ export function initEditor(root, { onLoadNote, onSave }) {
   const open = (note) => {
     title.value = note ? note.title : "";
     body.value = note ? note.content : "";
+    drawPreview();
     markClean();
   };
 
@@ -64,8 +88,8 @@ export function initEditor(root, { onLoadNote, onSave }) {
     return await onSave(title.value, body.value);
   };
 
-  bar.replaceChildren(status, save);
-  root.replaceChildren(bar, title, body);
+  bar.replaceChildren(toggle, status, save);
+  root.replaceChildren(bar, title, body, preview);
 
   return {
     open,
