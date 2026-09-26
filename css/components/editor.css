@@ -161,3 +161,46 @@
   padding-left: 1.4em;
   margin: 0.6em 0;
 }
+
+#preview mark {
+  background: var(--accent);
+  color: var(--bg);
+  padding: 0 0.2em;
+  border-radius: 3px;
+}
+
+#preview .tag {
+  color: var(--accent);
+  text-decoration: none;
+  font-family: var(--sans);
+  font-size: 0.85em;
+}
+
+#preview .callout {
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: 4px;
+  padding: 0.6em 1em;
+  margin: 0.8em 0;
+}
+
+#preview .callout-note {
+  border-left-color: var(--accent);
+}
+
+#preview .callout-warning {
+  border-left-color: #c0392b;
+}
+
+#preview .callout-title {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0 0 0.4em;
+}
+
+#preview .callout > *:last-child {
+  margin-bottom: 0;
+}
