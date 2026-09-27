@@ -176,6 +176,17 @@
   font-size: 0.85em;
 }
 
+#preview .wikilink {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+
+#preview .wikilink:hover {
+  border-bottom-color: var(--accent);
+}
+
 #preview .callout {
   border: 1px solid var(--line);
   border-left-width: 3px;

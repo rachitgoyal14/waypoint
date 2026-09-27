@@ -8,6 +8,15 @@ export function getNote(id) {
   return supabase.from("notes").select("*").eq("id", id).single();
 }
 
+// title match is case-insensitive; first row wins
+export function getNoteByTitle(title) {
+  return supabase
+    .from("notes")
+    .select("*")
+    .ilike("title", title)
+    .limit(1);
+}
+
 export function createNote(title, folder_id = null) {
   return supabase.from("notes").insert({ title, folder_id }).select().single();
 }

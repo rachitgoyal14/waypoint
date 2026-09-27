@@ -1,7 +1,7 @@
 import { el } from "../utils/dom.js";
 import { renderMarkdown } from "./markdown.js";
 
-export function initEditor(root, { onLoadNote, onSave }) {
+export function initEditor(root, { onSave, onOpenLink }) {
   const bar = el("div");
   bar.id = "editorbar";
 
@@ -23,7 +23,7 @@ export function initEditor(root, { onLoadNote, onSave }) {
 
   const drawPreview = () => {
     if (!previewOn) return;
-    preview.replaceChildren(renderMarkdown(body.value));
+    preview.replaceChildren(renderMarkdown(body.value, { onOpenLink }));
   };
 
   body.oninput = () => {

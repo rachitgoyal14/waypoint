@@ -4,6 +4,7 @@ import { el } from "../utils/dom.js";
 const TAG = /(^|\s)#([a-zA-Z][\w-]*)\b/g;
 const HIGHLIGHT = /==([^=\n]+)==/g;
 const CALLOUT = /^\[!(\w+)\]\s*(.*)$/;
+const WIKILINK = /\[\[([^\][\n]+)\]\]/g;
 
 export function extractTags(text) {
   const found = new Set();
@@ -13,14 +14,50 @@ export function extractTags(text) {
   return [...found];
 }
 
-export function renderMarkdown(text) {
+export function extractWikilinks(text) {
+  const found = [];
+  for (const [, title] of (text || "").matchAll(WIKILINK)) {
+    found.push(title.trim());
+  }
+  return found;
+}
+
+export function renderMarkdown(text, { onOpenLink } = {}) {
   const host = el("div", "preview");
   host.innerHTML = marked.parse(text || "", { gfm: true, breaks: true }); // marked's output, never raw user strings
 
   addHighlights(host);
   addTags(host);
+  addWikilinks(host, onOpenLink);
   addCallouts(host);
   return host;
+}
+
+export function wikilinkHtml(s) {
+  let changed = false;
+  const html = escaped(s).replace(WIKILINK, (m, raw) => {
+    changed = true;
+    const title = unescaped(raw).trim();
+    const attr = escaped(title).replace(/"/g, "&quot;");
+    return '<a href="#" class="wikilink" data-title="' + attr + '">' + escaped(title) + "</a>";
+  });
+  return changed ? html : null;
+}
+
+function addWikilinks(host, onOpenLink) {
+  for (const node of textNodes(host)) {
+    const s = node.textContent;
+    if (!s.includes("[[")) continue;
+    const html = wikilinkHtml(s);
+    if (!html) continue;
+    const span = swapHtml(node, html);
+    for (const a of span.querySelectorAll("a.wikilink")) {
+      a.onclick = (e) => {
+        e.preventDefault();
+        onOpenLink(a.dataset.title);
+      };
+    }
+  }
 }
 
 function addHighlights(host) {
@@ -49,12 +86,19 @@ function swapHtml(node, html) {
   const span = document.createElement("span");
   span.innerHTML = html; // escapes applied above, tags/mark written by this file
   node.replaceWith(span);
+  return span;
 }
 
 function escaped(s) {
   const d = el("div");
   d.textContent = s;
   return d.innerHTML;
+}
+
+function unescaped(s) {
+  const d = el("div");
+  d.innerHTML = s; // entity-only text: escaped() left no real tags to parse
+  return d.textContent;
 }
 
 function addCallouts(host) {

@@ -1,6 +1,12 @@
 import { isConfigured } from "./supabase/client.js";
 import { session, signIn, signOut, onAuthChange } from "./supabase/auth.js";
-import { listNotes, createNote, deleteNote, saveNote } from "./supabase/notes.js";
+import {
+  listNotes,
+  createNote,
+  deleteNote,
+  saveNote,
+  getNoteByTitle,
+} from "./supabase/notes.js";
 import {
   listFolders,
   createFolder,
@@ -66,7 +72,7 @@ async function show(user) {
 
 function initEditorOnce() {
   if (qs("#editorbar")) return;
-  editor = initEditor(qs("#editor"), { onSave: saveCurrent });
+  editor = initEditor(qs("#editor"), { onSave: saveCurrent, onOpenLink: openByTitle });
   window.addEventListener("beforeunload", (e) => {
     if (!editor.isDirty()) return;
     e.preventDefault();
@@ -129,6 +135,31 @@ async function saveCurrent() {
   notes = notes.map((n) => (n.id === currentId ? { ...n, title, content } : n));
   draw();
   return true;
+}
+
+async function openByTitle(title) {
+  const local = notes.find((n) => n.title.toLowerCase() === title.toLowerCase());
+  if (local) {
+    openNote(local.id);
+    return;
+  }
+  const { data, error } = await getNoteByTitle(title);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  if (data && data.length) {
+    if (!notes.some((n) => n.id === data[0].id)) notes.unshift(data[0]);
+    openNote(data[0].id);
+    return;
+  }
+  const { data: created, error: createError } = await createNote(title);
+  if (createError) {
+    fail(createError.message);
+    return;
+  }
+  notes.unshift(created);
+  openNote(created.id);
 }
 
 async function openNote(id) {
