@@ -5,8 +5,11 @@ import {
   createNote,
   deleteNote,
   saveNote,
+  setTags,
   getNoteByTitle,
 } from "./supabase/notes.js";
+import { replaceLinks } from "./supabase/links.js";
+import { extractWikilinks, extractTags } from "./editor/markdown.js";
 import {
   listFolders,
   createFolder,
@@ -132,13 +135,55 @@ async function saveCurrent() {
     fail(error.message);
     return false;
   }
+  await syncMeta(currentId, content);
   notes = notes.map((n) => (n.id === currentId ? { ...n, title, content } : n));
   draw();
   return true;
 }
 
+async function syncMeta(id, content) {
+  const { error: tagError } = await setTags(id, extractTags(content));
+  if (tagError) {
+    fail(tagError.message);
+    return;
+  }
+  const targetIds = [];
+  for (const t of extractWikilinks(content)) {
+    const known = byTitle(t);
+    if (known) {
+      targetIds.push(known.id);
+      continue;
+    }
+    const { data, error } = await getNoteByTitle(t);
+    if (error) {
+      fail(error.message);
+      continue;
+    }
+    if (data && data.length) {
+      if (!notes.some((n) => n.id === data[0].id)) notes.unshift(data[0]);
+      targetIds.push(data[0].id);
+      continue;
+    }
+    const { data: created, error: createError } = await createNote(t);
+    if (createError) {
+      fail(createError.message);
+      continue;
+    }
+    notes.unshift(created);
+    targetIds.push(created.id);
+  }
+  const { error: linkError } = await replaceLinks(id, targetIds);
+  if (linkError) {
+    fail(linkError.message);
+  }
+}
+
+function byTitle(t) {
+  return notes.find((n) => n.title.toLowerCase() === t.toLowerCase());
+}
+
 async function openByTitle(title) {
-  const local = notes.find((n) => n.title.toLowerCase() === title.toLowerCase());
+  const local = byTitle(title);
   if (local) {
     openNote(local.id);
     return;

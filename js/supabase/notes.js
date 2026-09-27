@@ -25,6 +25,10 @@ export function saveNote(id, title, content) {
   return supabase.from("notes").update({ title, content }).eq("id", id);
 }
 
+export function setTags(id, tags) {
+  return supabase.from("notes").update({ tags }).eq("id", id);
+}
+
 export function deleteNote(id) {
   return supabase.from("notes").delete().eq("id", id);
 }
