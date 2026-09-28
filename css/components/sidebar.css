@@ -172,3 +172,17 @@
 #backlinks-list button:hover {
   color: var(--accent);
 }
+
+#today {
+  margin-top: 1rem;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#today:hover {
+  border-color: var(--accent);
+}

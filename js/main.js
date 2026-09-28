@@ -22,6 +22,7 @@ import { renderFolderTree } from "./sidebar/folderTree.js";
 import { renderBacklinks } from "./sidebar/backlinks.js";
 import { initEditor } from "./editor/editor.js";
 import { backlinks } from "./supabase/links.js";
+import { openOrCreateToday, todayTitle } from "./daily/dailyNote.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -78,11 +79,25 @@ async function show(user) {
 function initEditorOnce() {
   if (qs("#editorbar")) return;
   editor = initEditor(qs("#editor"), { onSave: saveCurrent, onOpenLink: openByTitle });
+  const today = el("button", "", "Today");
+  today.onclick = openToday;
+  qs("#sidebar").append(today);
+  today.id = "today";
   window.addEventListener("beforeunload", (e) => {
     if (!editor.isDirty()) return;
     e.preventDefault();
     e.returnValue = "";
   });
+}
+
+async function openToday() {
+  const { note, error } = await openOrCreateToday();
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  if (!notes.some((n) => n.id === note.id)) notes.unshift(note);
+  openNote(note.id);
 }
 
 async function load() {
