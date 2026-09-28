@@ -136,3 +136,39 @@
   color: var(--muted);
   cursor: default;
 }
+
+#backlinks {
+  padding: 1rem;
+}
+
+#backlinks h3 {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+#backlinks-list {
+  display: grid;
+  gap: 2px;
+}
+
+#backlinks-list button {
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#backlinks-list button:hover {
+  color: var(--accent);
+}

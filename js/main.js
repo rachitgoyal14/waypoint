@@ -19,7 +19,9 @@ import {
 } from "./supabase/folders.js";
 import { renderNotesBar } from "./sidebar/notesList.js";
 import { renderFolderTree } from "./sidebar/folderTree.js";
+import { renderBacklinks } from "./sidebar/backlinks.js";
 import { initEditor } from "./editor/editor.js";
+import { backlinks } from "./supabase/links.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -138,7 +140,25 @@ async function saveCurrent() {
   await syncMeta(currentId, content);
   notes = notes.map((n) => (n.id === currentId ? { ...n, title, content } : n));
   draw();
+  loadBacklinks();
   return true;
+}
+
+async function loadBacklinks() {
+  if (!currentId) {
+    drawBacklinks([]);
+    return;
+  }
+  const { data, error } = await backlinks(currentId);
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  drawBacklinks(data || []);
+}
+
+function drawBacklinks(links) {
+  renderBacklinks(qs("#backlinks"), links, currentId, (id) => openNote(id));
 }
 
 async function syncMeta(id, content) {
@@ -222,6 +242,7 @@ async function openNote(id) {
   editorOpenId = id;
   editor.open(note);
   draw();
+  loadBacklinks();
 }
 
 async function remove() {
@@ -236,6 +257,7 @@ async function remove() {
   editorOpenId = null;
   editor.open(null);
   draw();
+  loadBacklinks();
 }
 
 async function addFolder(parentId = null) {
