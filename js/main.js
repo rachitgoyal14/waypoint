@@ -23,6 +23,7 @@ import { renderBacklinks } from "./sidebar/backlinks.js";
 import { initEditor } from "./editor/editor.js";
 import { backlinks } from "./supabase/links.js";
 import { openOrCreateToday, todayTitle } from "./daily/dailyNote.js";
+import { importFiles } from "./import/markdownImport.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -81,13 +82,69 @@ function initEditorOnce() {
   editor = initEditor(qs("#editor"), { onSave: saveCurrent, onOpenLink: openByTitle });
   const today = el("button", "", "Today");
   today.onclick = openToday;
-  qs("#sidebar").append(today);
   today.id = "today";
+  qs("#sidebar").append(today);
+  initImport();
   window.addEventListener("beforeunload", (e) => {
     if (!editor.isDirty()) return;
     e.preventDefault();
     e.returnValue = "";
   });
+}
+
+function initImport() {
+  const picker = el("input");
+  picker.type = "file";
+  picker.accept = ".md";
+  picker.multiple = true;
+  picker.style.display = "none";
+
+  const btn = el("button", "", "Import .md");
+  btn.onclick = () => picker.click();
+  btn.id = "import";
+
+  picker.onchange = () => {
+    if (picker.files.length) runImport(picker.files);
+    picker.value = "";
+  };
+
+  const drop = el("div", "dropzone", "or drop .md files here");
+  drop.ondragover = (e) => {
+    e.preventDefault();
+    drop.classList.add("over");
+  };
+  drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = (e) => {
+    e.preventDefault();
+    drop.classList.remove("over");
+    if (e.dataTransfer.files.length) runImport(e.dataTransfer.files);
+  };
+
+  qs("#sidebar").append(btn, picker, drop);
+}
+
+async function runImport(files) {
+  const status = qs("#importstatus") || (() => {
+    const p = el("p", "muted");
+    p.id = "importstatus";
+    qs("#sidebar").append(p);
+    return p;
+  })();
+  status.textContent = "Importing…";
+  const { imported, error } = await importFiles(files, (done, total) => {
+    status.textContent = `Importing ${done}/${total}…`;
+  });
+  if (error) {
+    status.textContent = "";
+    fail(error.message);
+    return;
+  }
+  const local = new Set(notes.map((n) => n.id));
+  for (const n of imported) {
+    if (!local.has(n.id)) notes.unshift(n);
+  }
+  status.textContent = imported.length ? `Imported ${imported.length} note${imported.length === 1 ? "" : "s"}` : "No .md files found";
+  draw();
 }
 
 async function openToday() {
