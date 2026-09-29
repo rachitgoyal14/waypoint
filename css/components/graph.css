@@ -1,1 +1,29 @@
-#graph { width: 100%; height: 200px; }
+#graph {
+  width: 100%;
+  height: 220px;
+  display: block;
+  border-bottom: 1px solid var(--line);
+}
+
+#graph .edge {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+#graph .node {
+  fill: var(--accent);
+}
+
+#graph .node.active {
+  fill: var(--text);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+#panel {
+  padding: 0;
+}
+
+#backlinks {
+  padding: 1rem;
+}

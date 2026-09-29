@@ -24,6 +24,9 @@ import { initEditor } from "./editor/editor.js";
 import { backlinks } from "./supabase/links.js";
 import { openOrCreateToday, todayTitle } from "./daily/dailyNote.js";
 import { importFiles } from "./import/markdownImport.js";
+import { listLinks } from "./supabase/links.js";
+import { runSimulation, buildGraph } from "./graph/simulation.js";
+import { drawGraph } from "./graph/render.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -33,6 +36,7 @@ let folders = [];
 let currentId = null;
 let editor = null;
 let editorOpenId = null;
+let allLinks = [];
 
 function form() {
   const input = el("input");
@@ -75,6 +79,7 @@ async function show(user) {
   initEditorOnce();
   load();
   loadFolders();
+  loadLinks();
 }
 
 function initEditorOnce() {
@@ -213,6 +218,7 @@ async function saveCurrent() {
   notes = notes.map((n) => (n.id === currentId ? { ...n, title, content } : n));
   draw();
   loadBacklinks();
+  loadLinks();
   return true;
 }
 
@@ -231,6 +237,25 @@ async function loadBacklinks() {
 
 function drawBacklinks(links) {
   renderBacklinks(qs("#backlinks"), links, currentId, (id) => openNote(id));
+}
+
+async function loadLinks() {
+  const { data, error } = await listLinks();
+  if (error) {
+    fail(error.message);
+    return;
+  }
+  allLinks = data || [];
+  drawGraphPanel();
+}
+
+function drawGraphPanel() {
+  const ids = new Set(notes.map((n) => n.id));
+  const links = allLinks.filter((l) => ids.has(l.source_note_id) && ids.has(l.target_note_id));
+  const graph = buildGraph(notes, links);
+  runSimulation(graph.nodes, graph.edges, () => {
+    drawGraph(qs("#graph"), graph, currentId, (id) => openNote(id));
+  });
 }
 
 async function syncMeta(id, content) {
