@@ -2,6 +2,29 @@
   padding: 1rem;
 }
 
+#searchbox {
+  margin-top: 1rem;
+}
+
+#searchbox input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+#searchbox input::placeholder {
+  color: var(--muted);
+}
+
+#searchbox input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 #folders {
   display: grid;
   gap: 2px;

@@ -19,6 +19,7 @@ import {
 } from "./supabase/folders.js";
 import { renderNotesBar } from "./sidebar/notesList.js";
 import { renderFolderTree } from "./sidebar/folderTree.js";
+import { filterNotes, renderSearch } from "./sidebar/search.js";
 import { renderBacklinks } from "./sidebar/backlinks.js";
 import { initEditor } from "./editor/editor.js";
 import { backlinks } from "./supabase/links.js";
@@ -38,6 +39,7 @@ let currentId = null;
 let editor = null;
 let editorOpenId = null;
 let allLinks = [];
+let query = "";
 
 function form() {
   const input = el("input");
@@ -435,15 +437,25 @@ function draw() {
     onNewFolder: addFolder,
     onDelete: remove,
   });
+
+  const search = renderSearch(side, setQuery);
+
   const tree = qs("#folders") || (() => {
     const d = el("div");
     d.id = "folders";
     side.append(d);
     return d;
   })();
-  renderFolderTree(tree, folders, notes, currentId, (id) => {
+  side.insertBefore(search, tree);
+
+  renderFolderTree(tree, folders, filterNotes(notes, query), currentId, (id) => {
     openNote(id);
   }, (folderId) => create(folderId), renameFolderById, removeFolder, moveToFolder);
+}
+
+function setQuery(q) {
+  query = q;
+  draw();
 }
 
 onAuthChange((s) => show(s));
