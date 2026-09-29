@@ -5,19 +5,41 @@
   border-bottom: 1px solid var(--line);
 }
 
-#graph .edge {
+#graph .edge,
+#graph-full .edge {
   stroke: var(--line);
   stroke-width: 1;
+  transition: opacity 0.15s, stroke 0.15s;
 }
 
-#graph .node {
+#graph .node,
+#graph-full .node {
   fill: var(--accent);
+  transition: opacity 0.15s, stroke 0.15s;
 }
 
-#graph .node.active {
+#graph .node.active,
+#graph-full .node.active {
   fill: var(--text);
   stroke: var(--accent);
   stroke-width: 2;
+}
+
+#graph .node.dim,
+#graph-full .node.dim,
+#graph .edge.dim,
+#graph-full .edge.dim {
+  opacity: 0.15;
+}
+
+#graph .node.lit,
+#graph-full .node.lit {
+  fill: var(--accent);
+}
+
+#graph .edge.lit,
+#graph-full .edge.lit {
+  stroke: var(--accent);
 }
 
 #panel {
@@ -26,4 +48,71 @@
 
 #backlinks {
   padding: 1rem;
+}
+
+#graph-expand {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+#graph-expand:hover {
+  color: var(--accent);
+}
+
+.graph-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 18, 0.8);
+  z-index: 50;
+}
+
+.graph-overlay.open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.graph-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  width: min(90vw, 720px);
+  height: min(80vh, 540px);
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.graph-head span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.graph-head button {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 0.25rem 0.7rem;
+  cursor: pointer;
+}
+
+#graph-full {
+  flex: 1;
+  width: 100%;
 }

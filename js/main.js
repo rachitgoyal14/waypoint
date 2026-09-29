@@ -27,6 +27,7 @@ import { importFiles } from "./import/markdownImport.js";
 import { listLinks } from "./supabase/links.js";
 import { runSimulation, buildGraph } from "./graph/simulation.js";
 import { drawGraph } from "./graph/render.js";
+import { initGraphOverlay } from "./graph/expand.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -77,6 +78,8 @@ async function show(user) {
   }
   account(s.user);
   initEditorOnce();
+  initOverlayOnce();
+  initGraphButton();
   load();
   loadFolders();
   loadLinks();
@@ -255,6 +258,28 @@ function drawGraphPanel() {
   const graph = buildGraph(notes, links);
   runSimulation(graph.nodes, graph.edges, () => {
     drawGraph(qs("#graph"), graph, currentId, (id) => openNote(id));
+  });
+}
+
+function initGraphButton() {
+  const expand = el("button", "", "Expand");
+  expand.id = "graph-expand";
+  expand.onclick = overlay.open;
+  qs("#panel").prepend(expand);
+}
+
+let overlay = null;
+
+function initOverlayOnce() {
+  if (overlay) return;
+  overlay = initGraphOverlay({
+    build: () => buildGraph(notes, allLinks.filter((l) =>
+      notes.some((n) => n.id === l.source_note_id) && notes.some((n) => n.id === l.target_note_id))),
+    activeId: () => currentId,
+    onOpen: (id) => {
+      overlay.close();
+      openNote(id);
+    },
   });
 }
 
