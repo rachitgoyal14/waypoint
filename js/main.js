@@ -79,6 +79,7 @@ async function show(user) {
     return;
   }
   account(s.user);
+  initTopbar();
   initEditorOnce();
   initOverlayOnce();
   initGraphButton();
@@ -263,6 +264,31 @@ function drawGraphPanel() {
   });
 }
 
+// On small screens the sidebar and the panel become drawers. Both buttons
+// hang off the top bar, and opening one always closes the other.
+
+function toggleDrawer(name) {
+  const other = name === "notes-open" ? "panel-open" : "notes-open";
+  app.classList.remove(other);
+  app.classList.toggle(name);
+}
+
+function initTopbar() {
+  if (qs("#topbar")) return;
+
+  const bar = el("header");
+  bar.id = "topbar";
+
+  const notesBtn = el("button", "", "Notes");
+  const linksBtn = el("button", "", "Links");
+
+  notesBtn.onclick = () => toggleDrawer("notes-open");
+  linksBtn.onclick = () => toggleDrawer("panel-open");
+
+  bar.append(notesBtn, el("span", "title", "waypoint"), linksBtn);
+  app.prepend(bar);
+}
+
 function initGraphButton() {
   const expand = el("button", "", "Expand");
   expand.id = "graph-expand";
@@ -352,6 +378,7 @@ async function openByTitle(title) {
 }
 
 async function openNote(id) {
+  app.classList.remove("notes-open", "panel-open");
   if (id === currentId) return;
   if (editor.isDirty()) {
     const choice = confirm("Save changes before switching?\n\nOK = save and switch, Cancel = discard and switch.");
