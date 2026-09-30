@@ -1,2 +1,72 @@
 .modal { display: none; }
 .modal.open { display: block; }
+
+
+/* The ⌘K palette. A dim backdrop with a floating box near the top;
+   the list keeps at most eight rows so it never becomes a second sidebar. */
+
+.palette {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 15vh 1rem 0;
+  background: rgba(10, 10, 18, 0.6);
+}
+
+.palette.open {
+  display: flex;
+}
+
+.palette-box {
+  width: min(480px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.palette input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.palette input:focus {
+  outline: none;
+}
+
+.palette-list {
+  display: grid;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.palette-list button {
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-list button.selected {
+  background: var(--line);
+  color: var(--accent);
+}
+
+.palette-list .muted {
+  padding: 0.6rem 0.9rem;
+  margin: 0;
+}

@@ -20,6 +20,7 @@ import {
 import { renderNotesBar } from "./sidebar/notesList.js";
 import { renderFolderTree } from "./sidebar/folderTree.js";
 import { filterNotes, renderSearch } from "./sidebar/search.js";
+import { initPalette } from "./sidebar/palette.js";
 import { renderBacklinks } from "./sidebar/backlinks.js";
 import { initEditor } from "./editor/editor.js";
 import { backlinks } from "./supabase/links.js";
@@ -81,6 +82,7 @@ async function show(user) {
   account(s.user);
   initTopbar();
   initEditorOnce();
+  initPaletteOnce();
   initOverlayOnce();
   initGraphButton();
   load();
@@ -287,6 +289,19 @@ function initTopbar() {
 
   bar.append(notesBtn, el("span", "title", "waypoint"), linksBtn);
   app.prepend(bar);
+}
+
+// The ⌘K palette is built once per session and just reads the live notes
+// array whenever it opens.
+
+let palette = null;
+
+function initPaletteOnce() {
+  if (palette) return;
+  palette = initPalette({
+    getNotes: () => notes,
+    onPick: (id) => openNote(id),
+  });
 }
 
 function initGraphButton() {

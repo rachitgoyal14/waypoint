@@ -12,6 +12,12 @@
   gap: 0.75rem;
 }
 
+.editor-hint {
+  margin: 20vh auto 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 #editorbar button {
   background: none;
   border: 1px solid var(--line);

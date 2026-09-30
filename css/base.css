@@ -1,12 +1,76 @@
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
 }
+
 button { font-family: inherit; }
 input, textarea { font-family: inherit; color: inherit; }
 .muted { color: var(--muted); }
-#auth { max-width: 320px; margin: 20vh auto; display: grid; gap: 0.5rem; }
-#account { display: flex; justify-content: space-between; align-items: center; }
+
+
+/* Every interactive element eases its color changes instead of snapping.
+   Deliberately color-only — transforms and layout stay instant so the
+   drawers and hover states feel crisp, not floaty. */
+
+button,
+input,
+textarea,
+a {
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+
+/* Keyboard focus is always visible, always in the accent color. Mouse
+   clicks get the browser's default (usually nothing), which keeps the
+   screen calm. */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+
+#auth {
+  max-width: 320px;
+  margin: 20vh auto;
+  display: grid;
+  gap: 0.5rem;
+}
+
+#auth input,
+#auth button {
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+#auth input {
+  color: var(--text);
+}
+
+#auth button {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+#auth button:hover {
+  border-color: var(--accent);
+}
+
+#account {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#account span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -21,6 +21,8 @@ export function initEditor(root, { onSave, onOpenLink }) {
   preview.id = "preview";
   let previewOn = false;
 
+  const hint = el("p", "editor-hint", "Pick a note on the left, press ⌘K to jump, or write a new one.");
+
   const drawPreview = () => {
     if (!previewOn) return;
     preview.replaceChildren(renderMarkdown(body.value, { onOpenLink }));
@@ -77,6 +79,7 @@ export function initEditor(root, { onSave, onOpenLink }) {
   });
 
   const open = (note) => {
+    hint.style.display = note ? "none" : "";
     title.value = note ? note.title : "";
     body.value = note ? note.content : "";
     drawPreview();
@@ -89,7 +92,7 @@ export function initEditor(root, { onSave, onOpenLink }) {
   };
 
   bar.replaceChildren(toggle, status, save);
-  root.replaceChildren(bar, title, body, preview);
+  root.replaceChildren(bar, hint, title, body, preview);
 
   return {
     open,
