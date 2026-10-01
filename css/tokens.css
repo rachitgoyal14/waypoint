@@ -1,10 +1,40 @@
+/* Design tokens. Everything visual keys off these — change a value here
+   and the whole app follows. */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400&display=swap");
+
 :root {
-  --bg: #14141f;
-  --panel: #1b1b29;
-  --text: #e8e6f0;
-  --muted: #8b89a6;
-  --accent: #e3b23c;
-  --line: #2a2a3d;
-  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  /* surfaces, darkest to lightest */
+  --bg: #101014;
+  --panel: #16161d;
+  --panel-2: #1c1c25;
+  --panel-3: #23232e;
+
+  /* strokes */
+  --line: #262631;
+  --line-strong: #33333f;
+
+  /* ink */
+  --text: #e6e5e1;
+  --muted: #82818c;
+  --faint: #55545e;
+
+  /* the one color that gets to be loud */
+  --accent: #d9a53f;
+  --accent-soft: rgba(217, 165, 63, 0.12);
+
+  /* feedback */
+  --danger: #e0564d;
+  --danger-soft: rgba(224, 86, 77, 0.12);
+  --ok: #58b98c;
+
+  /* type */
+  --sans: "Inter", system-ui, sans-serif;
   --serif: "Newsreader", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* shape + motion */
+  --radius: 8px;
+  --radius-sm: 6px;
+  --speed: 0.15s;
 }

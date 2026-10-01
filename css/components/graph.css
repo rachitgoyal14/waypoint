@@ -5,22 +5,34 @@
   border-bottom: 1px solid var(--line);
 }
 
+
+#graph:empty::after {
+  content: "no links yet";
+  display: block;
+  padding-top: 100px;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: var(--faint);
+}
+
+
 #graph .edge,
 #graph-full .edge {
-  stroke: var(--line);
+  stroke: var(--line-strong);
   stroke-width: 1;
-  transition: opacity 0.15s, stroke 0.15s;
+  transition: opacity var(--speed), stroke var(--speed);
 }
 
 #graph .node,
 #graph-full .node {
-  fill: var(--accent);
-  transition: opacity 0.15s, stroke 0.15s;
+  fill: var(--muted);
+  transition: opacity var(--speed), stroke var(--speed);
 }
 
 #graph .node.active,
 #graph-full .node.active {
-  fill: var(--text);
+  fill: var(--accent);
   stroke: var(--accent);
   stroke-width: 2;
 }
@@ -29,7 +41,7 @@
 #graph-full .node.dim,
 #graph .edge.dim,
 #graph-full .edge.dim {
-  opacity: 0.15;
+  opacity: 0.12;
 }
 
 #graph .node.lit,
@@ -42,13 +54,6 @@
   stroke: var(--accent);
 }
 
-#panel {
-  padding: 0;
-}
-
-#backlinks {
-  padding: 1rem;
-}
 
 #graph-expand {
   display: block;
@@ -57,20 +62,25 @@
   border: none;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
+  font: inherit;
   font-size: 0.75rem;
-  padding: 0.4rem;
+  padding: 0.45rem;
   cursor: pointer;
 }
 
 #graph-expand:hover {
   color: var(--accent);
+  background: var(--accent-soft);
 }
+
+
+/* Full-vault overlay. */
 
 .graph-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 18, 0.8);
+  background: rgba(8, 8, 12, 0.78);
   z-index: 50;
 }
 
@@ -82,34 +92,43 @@
 
 .graph-box {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  width: min(90vw, 720px);
-  height: min(80vh, 540px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  width: min(92vw, 760px);
+  height: min(82vh, 560px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .graph-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1rem;
   border-bottom: 1px solid var(--line);
 }
 
 .graph-head span {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--muted);
 }
 
 .graph-head button {
+  font: inherit;
+  font-size: 0.78rem;
   background: none;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   color: var(--text);
-  border-radius: 4px;
-  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.75rem;
   cursor: pointer;
+}
+
+.graph-head button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 #graph-full {

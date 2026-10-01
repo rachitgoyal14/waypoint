@@ -30,6 +30,7 @@ import { listLinks } from "./supabase/links.js";
 import { runSimulation, buildGraph } from "./graph/simulation.js";
 import { drawGraph } from "./graph/render.js";
 import { initGraphOverlay } from "./graph/expand.js";
+import { ask, confirmDialog } from "./ui/dialog.js";
 import { qs, el } from "./utils/dom.js";
 
 const authBox = qs("#auth");
@@ -43,16 +44,27 @@ let allLinks = [];
 let query = "";
 
 function form() {
+  const card = el("form", "auth-card");
   const input = el("input");
   input.type = "email";
   input.placeholder = "you@mail.com";
-  const btn = el("button", "", "Send magic link");
+  input.required = true;
+  const btn = el("button", "primary", "Send magic link");
+  btn.type = "submit";
   const msg = el("p", "muted");
-  btn.onclick = async () => {
+  card.onsubmit = async (e) => {
+    e.preventDefault();
     const { error } = await signIn(input.value.trim());
     msg.textContent = error ? error.message : "Check your email for the link.";
   };
-  authBox.replaceChildren(el("h1", "", "waypoint"), input, btn, msg);
+  card.append(
+    el("h1", "", "waypoint"),
+    el("p", "tagline", "Your notes, connected."),
+    input,
+    btn,
+    msg,
+  );
+  authBox.replaceChildren(card);
 }
 
 function account(user) {
@@ -64,7 +76,7 @@ function account(user) {
   }
   const btn = el("button", "", "Sign out");
   btn.onclick = () => signOut();
-  bar.replaceChildren(el("span", "muted", user.email), btn);
+  bar.replaceChildren(el("span", "", user.email), btn);
 }
 
 async function show(user) {
@@ -83,6 +95,7 @@ async function show(user) {
   initTopbar();
   initEditorOnce();
   initPaletteOnce();
+  initGraphButton();
   initOverlayOnce();
   initGraphButton();
   load();
@@ -305,7 +318,8 @@ function initPaletteOnce() {
 }
 
 function initGraphButton() {
-  const expand = el("button", "", "Expand");
+  if (qs("#graph-expand")) return;
+  const expand = el("button", "", "Expand vault graph");
   expand.id = "graph-expand";
   expand.onclick = overlay.open;
   qs("#panel").prepend(expand);
@@ -413,6 +427,13 @@ async function openNote(id) {
 
 async function remove() {
   if (!currentId) return;
+  const note = notes.find((n) => n.id === currentId);
+  const ok = await confirmDialog(`Delete "${note ? note.title : "Untitled"}"? This cannot be undone.`, {
+    title: "Delete note",
+    confirmText: "Delete",
+    danger: true,
+  });
+  if (!ok) return;
   const { error } = await deleteNote(currentId);
   if (error) {
     fail(error.message);
@@ -424,11 +445,12 @@ async function remove() {
   editor.open(null);
   draw();
   loadBacklinks();
+  loadLinks();
 }
 
 async function addFolder(parentId = null) {
-  const name = prompt("Folder name");
-  if (!name) return;
+  const name = await ask("Folder name", { title: "New folder", initial: "", confirmText: "Create" });
+  if (!name || !name.trim()) return;
   const { data, error } = await createFolder(name.trim(), parentId);
   if (error) {
     fail(error.message);
@@ -440,8 +462,8 @@ async function addFolder(parentId = null) {
 
 async function renameFolderById(id) {
   const folder = folders.find((f) => f.id === id);
-  const name = prompt("New name", folder ? folder.name : "");
-  if (!name) return;
+  const name = await ask("Folder name", { title: "Rename folder", initial: folder ? folder.name : "", confirmText: "Rename" });
+  if (!name || !name.trim()) return;
   const { error } = await renameFolder(id, name.trim());
   if (error) {
     fail(error.message);
@@ -452,6 +474,12 @@ async function renameFolderById(id) {
 }
 
 async function removeFolder(id) {
+  const folder = folders.find((f) => f.id === id);
+  const ok = await confirmDialog(
+    `Delete "${folder ? folder.name : "folder"}"? Notes inside move back to the root.`,
+    { title: "Delete folder", confirmText: "Delete", danger: true },
+  );
+  if (!ok) return;
   const { error } = await deleteFolder(id);
   if (error) {
     fail(error.message);
@@ -493,6 +521,20 @@ function draw() {
   renderFolderTree(tree, folders, filterNotes(notes, query), currentId, (id) => {
     openNote(id);
   }, (folderId) => create(folderId), renameFolderById, removeFolder, moveToFolder);
+
+  tidySidebar();
+}
+
+
+// The sidebar's pieces are created at different times, so DOM order drifts
+// as they appear. Appending in this order at the end of every draw keeps
+// toolbar, tree, actions, and the status strip in a fixed sequence.
+function tidySidebar() {
+  const side = qs("#sidebar");
+  for (const sel of ["#folders", "#today", "#import", ".dropzone", "#importstatus", "#noteerror"]) {
+    const n = side.querySelector(sel);
+    if (n) side.append(n);
+  }
 }
 
 function setQuery(q) {

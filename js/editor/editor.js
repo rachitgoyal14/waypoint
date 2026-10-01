@@ -5,8 +5,8 @@ export function initEditor(root, { onSave, onOpenLink }) {
   const bar = el("div");
   bar.id = "editorbar";
 
-  const status = el("span", "muted", "");
-  const save = el("button", "", "Save");
+  const status = el("span", "status", "");
+  const save = el("button", "primary", "Save");
   save.disabled = true;
 
   const title = el("input");
@@ -21,7 +21,8 @@ export function initEditor(root, { onSave, onOpenLink }) {
   preview.id = "preview";
   let previewOn = false;
 
-  const hint = el("p", "editor-hint", "Pick a note on the left, press ⌘K to jump, or write a new one.");
+  const hint = el("p", "editor-hint");
+  hint.append("Pick a note on the left, press ", el("kbd", "", "⌘K"), " to jump, or write a new one.");
 
   const drawPreview = () => {
     if (!previewOn) return;
@@ -48,11 +49,14 @@ export function initEditor(root, { onSave, onOpenLink }) {
     if (!save.disabled) return;
     save.disabled = false;
     status.textContent = "Unsaved changes";
+    status.classList.add("dirty");
+    status.classList.remove("error");
   };
 
   const markClean = () => {
     save.disabled = true;
     status.textContent = "";
+    status.classList.remove("dirty", "error");
   };
 
   title.oninput = markDirty;
@@ -61,12 +65,14 @@ export function initEditor(root, { onSave, onOpenLink }) {
     if (!dirty()) return;
     save.disabled = true;
     status.textContent = "Saving…";
+    status.classList.remove("dirty", "error");
     const ok = await onSave(title.value, body.value);
     if (ok) {
       markClean();
     } else {
       save.disabled = false;
       status.textContent = "Save failed";
+      status.classList.add("error");
     }
   };
 
@@ -80,6 +86,9 @@ export function initEditor(root, { onSave, onOpenLink }) {
 
   const open = (note) => {
     hint.style.display = note ? "none" : "";
+    title.style.display = note ? "" : "none";
+    body.style.display = note ? "" : "none";
+    if (!note && previewOn) toggle.onclick();
     title.value = note ? note.title : "";
     body.value = note ? note.content : "";
     drawPreview();

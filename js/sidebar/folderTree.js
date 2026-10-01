@@ -23,6 +23,15 @@ export function renderFolderTree(root, folders, notes, activeId, onPick, onNewNo
     root.append(noteRow(n, activeId, onPick, folders, onMoveNote));
   }
 
+  // Dropping anywhere outside a folder moves the note back to the root.
+  // Folder heads stop propagation so both handlers never fire.
+  root.ondragover = (e) => e.preventDefault();
+  root.ondrop = (e) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData("text/plain");
+    if (id) onMoveNote(id, null);
+  };
+
   function folderNode(f) {
     const kids = folders.filter((c) => c.parent_folder_id === f.id);
     const mine = notes.filter((n) => n.folder_id === f.id);
@@ -74,6 +83,7 @@ export function renderFolderTree(root, folders, notes, activeId, onPick, onNewNo
     head.ondragover = (e) => e.preventDefault();
     head.ondrop = (e) => {
       e.preventDefault();
+      e.stopPropagation();
       const id = e.dataTransfer.getData("text/plain");
       if (id) onMoveNote(id, f.id);
     };

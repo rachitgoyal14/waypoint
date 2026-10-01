@@ -4,7 +4,6 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 export function drawGraph(svg, graph, activeId, onOpen) {
   svg.replaceChildren();
-  svg.setAttribute("viewBox", "-110 -110 220 220");
 
   const neighbors = new Map();
   for (const e of graph.edges) {
@@ -44,6 +43,27 @@ export function drawGraph(svg, graph, activeId, onOpen) {
     }
     svg.append(c);
   }
+
+  fitView(svg, graph.nodes);
+}
+
+
+// Size the viewBox to the settled layout so nothing clips at the edges.
+// A square box keeps the circles circular in the short, wide mini panel.
+function fitView(svg, nodes) {
+  if (!nodes.length) {
+    svg.setAttribute("viewBox", "-100 -100 200 200");
+    return;
+  }
+
+  const pad = 30;
+  const xs = nodes.map((n) => n.x);
+  const ys = nodes.map((n) => n.y);
+  const minX = Math.min(...xs) - pad;
+  const minY = Math.min(...ys) - pad;
+  const side = Math.max(Math.max(...xs) - minX, Math.max(...ys) - minY, 60);
+
+  svg.setAttribute("viewBox", `${minX} ${minY} ${side} ${side}`);
 }
 
 function highlight(svg, id, neighbors) {

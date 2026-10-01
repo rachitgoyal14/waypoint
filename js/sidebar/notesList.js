@@ -8,10 +8,10 @@ export function renderNotesBar(side, activeId, actions) {
     side.append(bar);
   }
 
-  const add = el("button", "", "New note");
+  const add = el("button", "", "+ Note");
   add.onclick = actions.onNew;
 
-  const folder = el("button", "", "New folder");
+  const folder = el("button", "", "+ Folder");
   folder.onclick = () => actions.onNewFolder(null);
 
   const del = el("button", "", "Delete");
