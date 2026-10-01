@@ -1,8 +1,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 
-const url = localStorage.getItem("sb_url") || "https://zzyldohdatllqpdhxfmn.supabase.co";
-const key = localStorage.getItem("sb_key") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eWxkb2hkYXRsbHFwZGh4Zm1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5ODk1NzEsImV4cCI6MjEwNTU2NTU3MX0.S5hHTIbVi2wNmP6KY51idHYTHKGl_k2tv4EB9fJJHHQ";
+// Keys resolve in three steps:
+//
+//   1. localStorage overrides ("sb_url" / "sb_key") — handy for pointing a
+//      running app at a different project without touching any files,
+//   2. js/supabase/config.js, which sets window.WAYPOINT_CONFIG at page
+//      load (copy config.example.js to create it),
+//   3. nothing, in which case a placeholder client is created. It never
+//    reaches the network; the login screen just says the app isn't set up.
+//
+// The placeholder matters because auth.js wires onAuthStateChange at
+// startup, before any configuration check — a null client would crash
+// there, and every module imports this one.
 
-export const supabase = createClient(url, key);
-export const isConfigured = () => url.startsWith("https://");
+const overrideUrl = localStorage.getItem("sb_url");
+const overrideKey = localStorage.getItem("sb_key");
+const config = window.WAYPOINT_CONFIG || {};
+
+const url = overrideUrl || config.url || "";
+const key = overrideKey || config.key || "";
+
+export const supabase = createClient(
+  url || "https://not-configured.invalid",
+  key || "not-configured",
+);
+
+export const isConfigured = () => Boolean(url.startsWith("https://") && key.length > 20);

@@ -141,3 +141,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Supabase keys for local dev (copy from config.example.js)
+js/supabase/config.js
