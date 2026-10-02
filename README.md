@@ -1,8 +1,26 @@
 # waypoint
 
-A networked note-taking app for the web — folders, wikilinks, backlinks, daily notes, and a live graph of how your notes connect. Think Obsidian, but it runs in a browser tab and syncs through Supabase.
+Your notes, connected.
 
-No build step, no framework. Plain ES modules, one CSS file per concern, and `marked` from a CDN for markdown.
+Waypoint is a networked notebook for the web: write notes in folders, link them with
+`[[brackets]]`, and follow backlinks and the vault map to see how your thinking connects.
+Think Obsidian, but it runs in a browser tab and syncs through Supabase.
+
+No build step, no framework. Plain ES modules, one CSS file per concern, and `marked`
+from a CDN for markdown.
+
+## Project showcase
+
+| Landing | Note editor |
+| --- | --- |
+| ![Waypoint landing page](screenshots/landing-hero.png) | ![Note editor with sidebar and backlinks](screenshots/app-editor.png) |
+
+| Vault graph overlay | Jump-to-note palette |
+| --- | --- |
+| ![Expanded vault graph](screenshots/app-graph.png) | ![Command palette](screenshots/app-palette.png) |
+
+To add your own screenshots, save PNG files under `screenshots/` with these names:
+`landing-hero.png`, `app-editor.png`, `app-graph.png`, `app-palette.png`.
 
 ## Features
 
@@ -14,28 +32,34 @@ No build step, no framework. Plain ES modules, one CSS file per concern, and `ma
 - **Daily notes** — one "Today" button finds or creates today's note.
 - **Import** — drop a pile of `.md` files in and the batch importer wires up the links between them.
 - **Graph** — a force-directed mini map of the current note's neighborhood, expandable to the whole vault.
-- **Search & palette** — the sidebar filters titles, bodies, and tags; Cmd/Ctrl+K jumps to any note.
+- **Search and palette** — the sidebar filters titles, bodies, and tags; Cmd/Ctrl+K jumps to any note.
+- **Landing page** — a scrollable intro (story, trail tour, principles) with passwordless sign-in built in.
 - **Responsive** — below 900px the panes become slide-in drawers behind a top bar.
 
 ## Setup
 
 ### 1. Create the database
 
-Create a project at [supabase.com](https://supabase.com), then run `schema.sql` from this repo in the dashboard's SQL Editor. It creates the `notes`, `folders`, and `note_links` tables with row-level security locking every row to its owner.
+Create a project at [supabase.com](https://supabase.com), then run `schema.sql` from this repo
+in the dashboard's SQL Editor. It creates the `notes`, `folders`, and `note_links` tables with
+row-level security locking every row to its owner.
 
 ### 2. Configure your keys
 
-```sh
-cp js/supabase/config.example.js js/supabase/config.js
-```
+`js/supabase/config.js` holds your project URL and anon key (Supabase dashboard → Settings → API).
+Update it with your own values. The anon key is safe to ship — RLS does the actual guarding.
 
-Then fill in `config.js` with your project URL and anon key (Supabase dashboard → Settings → API). The file is gitignored, so keys never reach version control. The anon key is safe to ship — RLS does the actual guarding.
-
-For a quick throwaway session you can also set `sb_url` and `sb_key` in localStorage; they override the config file.
+For a quick throwaway session you can also set `sb_url` and `sb_key` in localStorage; they
+override the config file.
 
 ### 3. Enable magic links
 
-Authentication is passwordless. In Supabase → Authentication → Providers, enable Email and turn **off** "Confirm email" if you want one-click logins during development.
+Authentication is passwordless. In Supabase → Authentication → Providers, enable Email and turn
+**off** "Confirm email" if you want one-click logins during development.
+
+Note: Supabase's built-in email service allows about 2 login emails per hour per project, plus
+one resend per minute per address. For regular use, add a custom SMTP sender under
+Supabase → Authentication → Settings.
 
 ## Run it
 
@@ -54,7 +78,9 @@ The whole app is static — hand any host the folder and you're done.
 - **Vercel** — `vercel` in this directory; it detects zero-config static output.
 - **GitHub Pages** — push the repo, point Pages at the branch root.
 
-The one deploy-time decision: `config.js` is gitignored, so either commit it anyway (fine — the anon key is public by design), or have your host inject `window.WAYPOINT_CONFIG` another way, such as keeping the values in the host's environment settings and templating them at build.
+`config.js` is force-tracked in git so deploys include it. If you'd rather keep keys out of version
+control, have your host inject `window.WAYPOINT_CONFIG` another way, such as keeping the values
+in the host's environment settings and templating them at build.
 
 ## Project layout
 
@@ -62,9 +88,10 @@ The one deploy-time decision: `config.js` is gitignored, so either commit it any
 waypoint/
 ├── index.html
 ├── schema.sql
+├── screenshots/          showcase images used by this README
 ├── css/
 │   ├── tokens.css          design tokens (colors, fonts)
-│   ├── base.css            reset, transitions, auth screen
+│   ├── base.css            reset, transitions, landing page
 │   ├── layout.css          the three-pane grid + drawer behavior
 │   └── components/         sidebar, editor, graph, modals
 └── js/
