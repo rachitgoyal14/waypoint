@@ -1,3 +1,5 @@
+import { supabase, ownerId } from "./client.js";
+
 export function listNotes() {
   return supabase
     .from("notes")
@@ -5,10 +7,12 @@ export function listNotes() {
     .order("created_at", { ascending: false });
 }
 
-export function createNote(title, folder_id = null) {
+export async function createNote(title, folder_id = null) {
+  const owner = await ownerId();
+  if (owner.error) return { data: null, error: owner.error };
   return supabase
     .from("notes")
-    .insert({ title, folder_id })
+    .insert({ title, folder_id, user_id: owner.id })
     .select()
     .single();
 }
@@ -38,10 +42,12 @@ export function findDaily(date) {
     .limit(1);
 }
 
-export function createDaily(date) {
+export async function createDaily(date) {
+  const owner = await ownerId();
+  if (owner.error) return { data: null, error: owner.error };
   return supabase
     .from("notes")
-    .insert({ title: date, is_daily: true })
+    .insert({ title: date, is_daily: true, user_id: owner.id })
     .select()
     .single();
 }

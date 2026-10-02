@@ -43,28 +43,221 @@ let editorOpenId = null;
 let allLinks = [];
 let query = "";
 
+// Local helpers (kept in main.js so a stale-cached client.js can never
+// break the import — see "doesn't provide an export named" errors).
+function localConfig() {
+  return window.WAYPOINT_CONFIG || {};
+}
+
+function getConfigSource() {
+  if (localStorage.getItem("sb_url") || localStorage.getItem("sb_key")) {
+    return "localStorage overrides (sb_url / sb_key)";
+  }
+  const c = localConfig();
+  if (c.url || c.key) return "js/supabase/config.js";
+  return "none";
+}
+
+async function pingSupabase(timeoutMs = 8000) {
+  if (!isConfigured()) return { ok: false, reason: "not-configured" };
+  const url = (localStorage.getItem("sb_url") || localConfig().url || "").replace(/\/$/, "");
+  const key = localStorage.getItem("sb_key") || localConfig().key || "";
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${url}/auth/v1/health`, {
+      signal: ctrl.signal,
+      headers: { apikey: key },
+    });
+    return { ok: true, status: res.status };
+  } catch (e) {
+    return { ok: false, reason: e?.name === "AbortError" ? "timeout" : "network", error: e };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 function form() {
+  const stage = el("div", "auth-stage");
+
+  const story = el("div", "auth-story");
+  const brand = el("div", "auth-brand");
+  brand.append(el("div", "auth-mark", "◈"), el("h1", "", "waypoint"));
+  const tagline = el("p", "tagline", "Your notes, connected.");
+
+  const intro = el("p", "auth-intro");
+  intro.textContent =
+    "Waypoint is a networked notebook: write notes in folders, link them with [[brackets]], " +
+    "and follow backlinks and the vault map to see how your thinking connects.";
+
+  const feats = el("div", "auth-features");
+  // Key clusters render as real keycaps (see kbd styles) — anything you
+  // press looks pressable; [[ ]] reads as typed input.
+  const keys = (...labels) => {
+    const wrap = el("span", "kbd-cluster");
+    for (const lab of labels) wrap.append(el("kbd", "", lab));
+    return wrap;
+  };
+  for (
+    const [cap, t] of [
+      [keys("[[", "]]"), "Link notes with brackets; backlinks collect themselves"],
+      [keys("⌘", "K"), "Jump to any note without touching the mouse"],
+      [keys("⌘", "S"), "Save the open note from the keyboard"],
+      [keys("Today"), "A fresh daily note waiting every morning"],
+    ]
+  ) {
+    const row = el("div");
+    row.append(cap, document.createTextNode(t));
+    feats.append(row);
+  }
+  story.append(brand, tagline, intro, feats);
+
   const card = el("form", "auth-card");
+  card.setAttribute("novalidate", "");
+  const signTitle = el("h2", "auth-signin", "Sign in");
+
+  const label = el("label", "", "Email address");
+  label.setAttribute("for", "auth-email");
   const input = el("input");
+  input.id = "auth-email";
   input.type = "email";
+  input.name = "email";
   input.placeholder = "you@mail.com";
   input.required = true;
+  input.autocomplete = "email";
+
   const btn = el("button", "primary", "Send magic link");
   btn.type = "submit";
-  const msg = el("p", "muted");
+
+  const msg = el("p", "auth-msg");
+  msg.setAttribute("role", "status");
+
+  const help = el("p", "auth-help");
+  help.textContent = "No password to remember. We email you a one-click sign-in link.";
+  const steps = el("ol", "auth-steps");
+  for (
+    const s of [
+      "Enter your email below.",
+      "Open the link we send you.",
+      "You land back here, signed in.",
+    ]
+  ) {
+    steps.append(el("li", "", s));
+  }
+
   card.onsubmit = async (e) => {
     e.preventDefault();
-    const { error } = await signIn(input.value.trim());
-    msg.textContent = error ? error.message : "Check your email for the link.";
+    if (btn.disabled) return;
+    const email = input.value.trim();
+    btn.disabled = true;
+    btn.innerHTML = "";
+    btn.append(el("span", "spinner"), document.createTextNode("Sending…"));
+    msg.className = "auth-msg";
+    msg.textContent = "Contacting Supabase…";
+    let holding = false;
+    // Supabase allows one resend per minute per address — hold the button
+    // so rapid clicks can't burn the tiny hourly email allowance.
+    const cooldown = (secs) => {
+      holding = true;
+      let left = secs;
+      const tick = () => {
+        if (left <= 0) {
+          btn.disabled = false;
+          btn.textContent = "Send magic link";
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = `Resend in 0:${String(left).padStart(2, "0")}`;
+        left -= 1;
+        setTimeout(tick, 1000);
+      };
+      tick();
+    };
+    try {
+      const ping = await pingSupabase();
+      if (!ping.ok) {
+        if (ping.reason === "network" || ping.reason === "timeout") {
+          throw new Error(
+            "Cannot reach your Supabase project at all (no HTTP response — DNS/network). " +
+              "I checked from this machine: the hostname does not resolve (NXDOMAIN), so no email " +
+              "can ever be sent until the URL is fixed. Create or unpause the project, paste the real " +
+              "URL + anon key into js/supabase/config.js, then hard-reload. See console for the raw error.",
+          );
+        }
+        throw new Error(
+          "Supabase keys are missing or malformed. Check js/supabase/config.js (or sb_url / sb_key overrides).",
+        );
+      }
+      const { error } = await signIn(email);
+      if (error) throw error;
+      msg.className = "auth-msg ok";
+      msg.textContent =
+        "Check your email for the link — it opens right back here. Give it a minute " +
+        "before resending; rapid repeats get throttled.";
+      cooldown(60);
+    } catch (err) {
+      console.error("[waypoint] magic-link failure:", err);
+      msg.className = "auth-msg error";
+      msg.textContent = err?.message || "Something went wrong sending the link.";
+      if (err?.rateLimited) cooldown(60);
+    } finally {
+      if (!holding) {
+        btn.disabled = false;
+        btn.textContent = "Send magic link";
+      }
+    }
   };
-  card.append(
-    el("h1", "", "waypoint"),
-    el("p", "tagline", "Your notes, connected."),
-    input,
-    btn,
-    msg,
-  );
-  authBox.replaceChildren(card);
+  card.append(signTitle, help, label, input, btn, msg, steps);
+  const hero = el("div", "auth-hero");
+  hero.append(story, card);
+
+  const tour = el("section", "auth-tour");
+  tour.append(el("h2", "", "Walk the trails."));
+  const tourSub = el("p", "auth-tour-sub");
+  tourSub.textContent = "Everything waypoint does, on one survey. Sign in above and it is all yours.";
+  const grid = el("div", "tour-grid");
+  for (
+    const [b, h, t] of [
+      ["[[ ]]", "Wikilinks", "Bracket any title to link it. The target note is created if it does not exist yet."],
+      ["◇", "Backlinks", "Every note lists what points at it, so context gathers on its own."],
+      ["▦", "Folders", "Nest folders, drag notes between them, rename and delete without fear."],
+      ["◍", "Vault map", "A live graph of your trails, expandable to the whole territory."],
+      ["Today", "Daily notes", "One keypress finds or starts today's page, every morning."],
+      [["⌘", "K"], "Search", "Titles, bodies, and tags in one jump-to-note finder."],
+    ]
+  ) {
+    const row = el("div", "tour-row");
+    const tick = Array.isArray(b) ? keys(...b) : el("b", "", b);
+    const body = el("div");
+    body.append(el("h3", "", h), el("p", "", t));
+    row.append(tick, body);
+    grid.append(row);
+  }
+  tour.append(tourSub, grid);
+
+  const detail = el("section", "auth-detail");
+  detail.append(el("h2", "", "A notebook that thinks in trails."));
+  const detailSub = el("p", "auth-tour-sub");
+  detailSub.textContent = "Three ideas hold the whole app together.";
+  const cols = el("div", "detail-grid");
+  for (
+    const [h, t] of [
+      ["Write in peace", "A quiet sheet with markdown, folders, and daily notes. Nothing badges, pings, or gamifies. Your words stay the loudest thing on the page."],
+      ["Link as you think", "Bracket a title mid-sentence and the connection exists. Backlinks gather on their own and the vault map draws itself from your trails."],
+      ["Yours to keep", "Notes live in your own Supabase project, each row locked to its owner. Take everything with you any time as plain markdown files."],
+    ]
+  ) {
+    const cell = el("div", "detail-cell");
+    cell.append(el("h3", "", h), el("p", "", t));
+    cols.append(cell);
+  }
+  const cta = el("button", "btn primary auth-cta", "Start writing");
+  cta.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  detail.append(detailSub, cols, cta);
+
+  const foot = el("p", "auth-foot", "Waypoint is MIT-licensed free software. Your notes live in your own Supabase project.");
+  stage.append(hero, tour, detail, foot);
+  authBox.replaceChildren(stage);
 }
 
 function account(user) {
@@ -81,7 +274,20 @@ function account(user) {
 
 async function show(user) {
   if (!isConfigured()) {
-    authBox.textContent = "Set keys in js/supabase/client.js";
+    authBox.style.display = "grid";
+    app.style.display = "none";
+    const card = el("div", "auth-card");
+    const brand = el("div", "auth-brand");
+    brand.append(el("div", "auth-mark", "◈"), el("h1", "", "waypoint"));
+    const msg = el("p", "auth-msg error");
+    msg.textContent =
+      `Supabase keys are missing (source: ${getConfigSource()}). ` +
+      "Copy js/supabase/config.example.js to js/supabase/config.js and paste your project URL + anon key, " +
+      "or set sb_url / sb_key in localStorage.";
+    card.append(brand, el("p", "tagline", "Setup needed before you can sign in."), msg);
+    const hero = el("div", "auth-hero");
+    hero.append(card);
+    authBox.replaceChildren(hero);
     return;
   }
   const s = user !== undefined ? user : await session();
@@ -95,7 +301,6 @@ async function show(user) {
   initTopbar();
   initEditorOnce();
   initPaletteOnce();
-  initGraphButton();
   initOverlayOnce();
   initGraphButton();
   load();
@@ -321,8 +526,11 @@ function initGraphButton() {
   if (qs("#graph-expand")) return;
   const expand = el("button", "", "Expand vault graph");
   expand.id = "graph-expand";
-  expand.onclick = overlay.open;
-  qs("#panel").prepend(expand);
+  expand.onclick = () => overlay?.open();
+  const panel = qs("#panel");
+  const backlinks = qs("#backlinks");
+  if (backlinks) panel.insertBefore(expand, backlinks);
+  else panel.prepend(expand);
 }
 
 let overlay = null;
@@ -544,3 +752,14 @@ function setQuery(q) {
 
 onAuthChange((s) => show(s));
 show();
+
+window.addEventListener("error", (e) => {
+  const msg = String(e?.message || "");
+  if (/esm\.sh|supabase-js|Failed to fetch|NetworkError/i.test(msg)) {
+    const box = qs("#auth");
+    if (box && !box.firstChild) {
+      box.textContent =
+        "Could not load the Supabase library (network error). Check your connection and reload.";
+    }
+  }
+}, true);

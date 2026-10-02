@@ -1,6 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-
 // Keys resolve in three steps:
 //
 //   1. localStorage overrides ("sb_url" / "sb_key") — handy for pointing a
@@ -27,3 +26,38 @@ export const supabase = createClient(
 );
 
 export const isConfigured = () => Boolean(url.startsWith("https://") && key.length > 20);
+
+export function getConfigSource() {
+  if (overrideUrl || overrideKey) return "localStorage overrides (sb_url / sb_key)";
+  if (config.url || config.key) return "js/supabase/config.js";
+  return "none";
+}
+
+// Every row in notes/folders carries its owner's id, and RLS requires
+// WITH CHECK (auth.uid() = user_id). Insert helpers must stamp user_id
+// explicitly — a missing id fails as an RLS violation, not a NULL error.
+export async function ownerId() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) return { id: null, error };
+  if (!data?.user) return { id: null, error: new Error("Not signed in.") };
+  return { id: data.user.id, error: null };
+}
+
+/** Lightweight reachability probe — distinguishes "wrong keys" from "no network". */
+export async function pingSupabase(timeoutMs = 8000) {
+  if (!isConfigured()) return { ok: false, reason: "not-configured" };
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${url.replace(/\/$/, "")}/auth/v1/health`, {
+      signal: ctrl.signal,
+      headers: { apikey: key },
+    });
+    // Any HTTP response (even 401) proves DNS + network + project exist.
+    return { ok: true, status: res.status };
+  } catch (e) {
+    return { ok: false, reason: e?.name === "AbortError" ? "timeout" : "network", error: e };
+  } finally {
+    clearTimeout(t);
+  }
+}

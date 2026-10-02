@@ -1,137 +1,148 @@
-#graph {
-  width: 100%;
-  height: 220px;
-  display: block;
-  border-bottom: 1px solid var(--line);
+/* The survey instrument: contour field, blaze fixes, lichen drift. */
+
+.panel-section { padding: 0.9rem; border-bottom: 1px solid var(--line); }
+
+.panel-label {
+  margin: 0 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
+.panel-label::before {
+  content: "";
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--blaze);
+  box-shadow: 0 0 8px var(--blaze-glow);
+}
+
+#graph {
+  width: 100%;
+  height: 232px;
+  display: block;
+  background-color: #0a0f0b;
+  background-image:
+    repeating-radial-gradient(300px 300px at 50% 130%, transparent 0 24px, rgba(234, 229, 211, 0.05) 24px 25px),
+    radial-gradient(circle at 1px 1px, rgba(234,229,211,0.09) 1px, transparent 1px);
+  background-size: auto, 18px 18px;
+  border-bottom: 1px solid var(--line);
+  cursor: grab;
+}
 
 #graph:empty::after {
-  content: "no links yet";
+  content: "No trails surveyed yet. Link notes with [[brackets]] and the map draws itself.";
   display: block;
-  padding-top: 100px;
+  padding: 92px 1.6rem 0;
   text-align: center;
   font-family: var(--sans);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
+  line-height: 1.6;
   color: var(--faint);
 }
 
-
-#graph .edge,
-#graph-full .edge {
-  stroke: var(--line-strong);
+#graph .edge, #graph-full .edge { stroke: #3a443c; stroke-width: 1.2; }
+#graph .node, #graph-full .node {
+  fill: var(--lichen);
+  stroke: rgba(234, 229, 211, 0.2);
   stroke-width: 1;
-  transition: opacity var(--speed), stroke var(--speed);
+  opacity: 0.85;
 }
-
-#graph .node,
-#graph-full .node {
-  fill: var(--muted);
-  transition: opacity var(--speed), stroke var(--speed);
-}
-
-#graph .node.active,
-#graph-full .node.active {
-  fill: var(--accent);
-  stroke: var(--accent);
+#graph .node.active, #graph-full .node.active {
+  fill: var(--blaze);
+  stroke: #ffd3e5;
   stroke-width: 2;
+  opacity: 1;
+  filter: drop-shadow(0 0 10px var(--blaze-glow));
 }
-
-#graph .node.dim,
-#graph-full .node.dim,
-#graph .edge.dim,
-#graph-full .edge.dim {
-  opacity: 0.12;
-}
-
-#graph .node.lit,
-#graph-full .node.lit {
-  fill: var(--accent);
-}
-
-#graph .edge.lit,
-#graph-full .edge.lit {
-  stroke: var(--accent);
-}
-
+#graph .node.dim, #graph-full .node.dim, #graph .edge.dim, #graph-full .edge.dim { opacity: 0.1; }
+#graph .node.lit, #graph-full .node.lit { fill: var(--blaze); opacity: 1; }
+#graph .edge.lit, #graph-full .edge.lit { stroke: var(--blaze); stroke-width: 1.6; }
 
 #graph-expand {
   display: block;
   width: 100%;
-  background: none;
+  background: transparent;
   border: none;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
   font: inherit;
-  font-size: 0.75rem;
-  padding: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.62rem;
   cursor: pointer;
 }
 
-#graph-expand:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
-}
+#graph-expand:hover { color: var(--blaze); background: var(--blaze-soft); }
 
-
-/* Full-vault overlay. */
-
+/* Full-survey glass. */
 .graph-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(8, 8, 12, 0.78);
+  background: var(--overlay);
+  backdrop-filter: blur(10px);
   z-index: 50;
 }
 
-.graph-overlay.open {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.graph-overlay.open { display: flex; align-items: center; justify-content: center; padding: 1rem; animation: fadein 0.2s ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
 .graph-box {
-  background: var(--panel);
+  background: linear-gradient(180deg, #1a231c, #101613);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
-  width: min(92vw, 760px);
-  height: min(82vh, 560px);
+  border-radius: var(--glass-r);
+  width: min(94vw, 820px);
+  height: min(84vh, 600px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: pop 0.3s var(--spring);
 }
+
+@keyframes pop { from { opacity: 0; transform: scale(0.97) translateY(8px); } to { opacity: 1; transform: none; } }
 
 .graph-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.55rem 1rem;
+  padding: 0.7rem 1.1rem;
   border-bottom: 1px solid var(--line);
 }
 
-.graph-head span {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--muted);
+.graph-head span { font-size: 0.82rem; font-weight: 650; color: var(--text-dim); }
+
+.graph-head .graph-count {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--faint);
+  margin-right: auto;
+  margin-left: 0.9rem;
 }
 
 .graph-head button {
   font: inherit;
   font-size: 0.78rem;
-  background: none;
+  font-weight: 600;
+  background: rgba(234, 229, 211, 0.06);
   border: 1px solid var(--line-strong);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: 0.25rem 0.75rem;
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 0.32rem 0.9rem;
   cursor: pointer;
 }
 
-.graph-head button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
+.graph-head button:hover { border-color: var(--line-blaze); color: var(--blaze); }
 #graph-full {
   flex: 1;
   width: 100%;
+  min-height: 0;
+  background-color: #0a0f0b;
+  background-image:
+    repeating-radial-gradient(420px 420px at 50% 120%, transparent 0 30px, rgba(234, 229, 211, 0.05) 30px 31px),
+    radial-gradient(circle at 1px 1px, rgba(234,229,211,0.08) 1px, transparent 1px);
+  background-size: auto, 20px 20px;
 }

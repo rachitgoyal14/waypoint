@@ -1,11 +1,17 @@
-import { supabase } from "./client.js";
+import { supabase, ownerId } from "./client.js";
 
 export function listFolders() {
   return supabase.from("folders").select("*").order("name");
 }
 
-export function createFolder(name, parent_folder_id = null) {
-  return supabase.from("folders").insert({ name, parent_folder_id }).select().single();
+export async function createFolder(name, parent_folder_id = null) {
+  const owner = await ownerId();
+  if (owner.error) return { data: null, error: owner.error };
+  return supabase
+    .from("folders")
+    .insert({ name, parent_folder_id, user_id: owner.id })
+    .select()
+    .single();
 }
 
 export function renameFolder(id, name) {

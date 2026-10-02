@@ -1,15 +1,9 @@
-.modal {
-  display: none;
-}
+/* Instruments that float above the survey: finder glass, dialogs. */
 
-.modal.open {
-  display: block;
-}
+.modal { display: none; }
+.modal.open { display: block; }
 
-
-/* The ⌘K palette. A dim backdrop with a floating box near the top;
-   the list keeps at most eight rows so it never becomes a second sidebar. */
-
+/* The finder: a single glass instrument, mono coordinates. */
 .palette {
   position: fixed;
   inset: 0;
@@ -17,77 +11,75 @@
   display: none;
   justify-content: center;
   align-items: flex-start;
-  padding: 14vh 1rem 0;
-  background: rgba(8, 8, 12, 0.6);
+  padding: 13vh 1rem 0;
+  background: var(--overlay);
+  backdrop-filter: blur(8px);
 }
 
-.palette.open {
-  display: flex;
-}
+.palette.open { display: flex; animation: fadein 0.18s ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
 .palette-box {
-  width: min(500px, 100%);
-  background: var(--panel-2);
+  width: min(540px, 100%);
+  background: linear-gradient(180deg, #1d261f, #121814);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
+  border-radius: var(--glass-r);
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
+  animation: pop 0.28s var(--spring);
 }
+
+@keyframes pop { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
 
 .palette input {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.95rem 1.15rem;
   font: inherit;
+  font-size: 1rem;
   color: var(--text);
-  background: none;
+  background: transparent;
   border: none;
   border-bottom: 1px solid var(--line);
 }
 
-.palette input::placeholder {
-  color: var(--faint);
-}
+.palette input::placeholder { color: var(--faint); }
+.palette input:focus { outline: none; }
 
-.palette input:focus {
-  outline: none;
-}
-
-.palette-list {
-  display: grid;
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: 0.3rem;
-}
+.palette-list { display: grid; gap: 2px; max-height: 52vh; overflow-y: auto; padding: 0.45rem; }
 
 .palette-list button {
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   background: none;
-  border: none;
-  color: var(--text);
+  border: 1px solid transparent;
+  color: var(--text-dim);
   text-align: left;
-  padding: 0.55rem 0.7rem;
-  border-radius: var(--radius-sm);
+  padding: 0.62rem 0.8rem 0.62rem 1.5rem;
+  border-radius: 12px;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  position: relative;
 }
 
-.palette-list button.selected {
-  background: var(--accent-soft);
-  color: var(--accent);
+.palette-list button::before {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--faint);
 }
 
-.palette-list .muted {
-  padding: 0.6rem 0.7rem;
-  margin: 0;
-  font-size: 0.85rem;
-}
+.palette-list button.selected { background: var(--blaze-soft); border-color: rgba(229,72,140,0.3); color: var(--blaze); }
+.palette-list button.selected::before { background: var(--blaze); }
+.palette-list .muted { padding: 0.8rem; margin: 0; font-size: 0.86rem; text-align: center; }
 
-
-/* Ask/confirm dialogs, replacing window.prompt and window.confirm. */
-
+/* Dialogs: plain verdicts, sentence case, one job each. */
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -95,93 +87,63 @@
   display: none;
   justify-content: center;
   align-items: flex-start;
-  padding: 20vh 1rem 0;
-  background: rgba(8, 8, 12, 0.6);
+  padding: 19vh 1rem 0;
+  background: var(--overlay);
+  backdrop-filter: blur(8px);
 }
 
-.dialog-backdrop.open {
-  display: flex;
-}
+.dialog-backdrop.open { display: flex; animation: fadein 0.18s ease; }
 
 .dialog {
-  width: min(380px, 100%);
-  background: var(--panel-2);
+  width: min(400px, 100%);
+  background: linear-gradient(180deg, #1d261f, #121814);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
-  padding: 1.25rem;
+  border-radius: var(--sheet-r);
+  padding: 1.4rem;
   display: grid;
-  gap: 0.75rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  gap: 0.8rem;
+  box-shadow: var(--shadow-lg);
+  animation: pop 0.28s var(--spring);
 }
 
-.dialog-title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.dialog-msg {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
+.dialog-title { margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em; }
+.dialog-msg { margin: 0; color: var(--muted); font-size: 0.89rem; line-height: 1.6; }
 
 .dialog input {
   font: inherit;
   color: var(--text);
-  background: var(--bg);
+  background: rgba(0,0,0,0.35);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  padding: 0.62rem 0.8rem;
+  width: 100%;
 }
 
-.dialog input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
+.dialog input:focus { outline: none; border-color: var(--blaze); box-shadow: 0 0 0 3px var(--blaze-soft); }
 
-.dialog-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-}
+.dialog-row { display: flex; justify-content: flex-end; gap: 0.55rem; margin-top: 0.3rem; }
 
 .dialog-btn {
   font: inherit;
   font-size: 0.85rem;
-  color: var(--text);
-  background: none;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: rgba(234,229,211,0.05);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.42rem 0.9rem;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
   cursor: pointer;
 }
 
-.dialog-btn:hover {
-  color: var(--text);
-  border-color: var(--muted);
-}
+.dialog-btn:hover { border-color: var(--muted); color: var(--text); }
 
 .dialog-btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #17130a;
-  font-weight: 500;
+  background: linear-gradient(180deg, #f0609c, var(--blaze));
+  border-color: rgba(255,255,255,0.25);
+  color: #fff;
 }
 
-.dialog-btn.primary:hover {
-  filter: brightness(1.1);
-  color: #17130a;
-}
+.dialog-btn.primary:hover { filter: brightness(1.08); color: #fff; }
 
-.dialog-btn.danger {
-  background: var(--danger-soft);
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-.dialog-btn.danger:hover {
-  filter: brightness(1.1);
-}
+.dialog-btn.danger { background: var(--ember-soft); border-color: rgba(228,101,95,0.45); color: var(--ember); }
+.dialog-btn.danger:hover { filter: brightness(1.1); }

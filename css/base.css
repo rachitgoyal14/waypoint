@@ -1,189 +1,496 @@
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html {
-  color-scheme: dark;
-}
+html { color-scheme: dark; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100vh;
+  background: var(--night);
   color: var(--text);
   font-family: var(--sans);
   font-size: 15px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-
-::selection {
-  background: var(--accent-soft);
-  color: var(--text);
+/* Contour terrain behind everything: the survey sheet the app sits on. */
+.bg-terrain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(760px 460px at 8% -8%, rgba(229, 72, 140, 0.08), transparent 62%),
+    radial-gradient(820px 520px at 94% 6%, rgba(157, 184, 154, 0.09), transparent 60%),
+    repeating-radial-gradient(720px 720px at 82% 118%, transparent 0 26px, rgba(234, 229, 211, 0.028) 26px 27px),
+    repeating-radial-gradient(560px 560px at 6% 112%, transparent 0 22px, rgba(234, 229, 211, 0.022) 22px 23px),
+    var(--night);
 }
 
+/* Back-compat: older markup may still render .bg-glow. */
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(760px 460px at 8% -8%, rgba(229, 72, 140, 0.08), transparent 62%),
+    radial-gradient(820px 520px at 94% 6%, rgba(157, 184, 154, 0.09), transparent 60%),
+    var(--night);
+}
 
-/* Color-only easing everywhere; transforms stay instant so the drawers
-   and hover states feel crisp, not floaty. */
+#auth,
+#app { position: relative; z-index: 1; }
 
-button,
-input,
-textarea,
-a {
+::selection { background: rgba(229, 72, 140, 0.4); color: #fff; }
+
+button, input, textarea, a {
   transition: color var(--speed) ease, background-color var(--speed) ease,
-    border-color var(--speed) ease;
+    border-color var(--speed) ease, box-shadow var(--speed) ease;
 }
 
+:focus-visible { outline: 2px solid var(--blaze); outline-offset: 2px; border-radius: 6px; }
 
-/* Keyboard focus is always visible, mouse clicks stay calm. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2b352c; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #3b473c; background-clip: content-box; border: 2px solid transparent; }
+::-webkit-scrollbar-track { background: transparent; }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.muted { color: var(--muted); }
+
+/* Keycaps: anything you press looks pressable. */
+kbd {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text);
+  background: #1a221c;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 0.14em 0.5em;
+  white-space: nowrap;
 }
 
+.kbd-cluster { display: inline-flex; gap: 3px; flex: none; }
 
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--panel-3);
-  border-radius: 5px;
-  border: 2px solid var(--panel);
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-
-.muted {
-  color: var(--muted);
-}
-
-
-/* The two shared button shapes. Everything in the app is one of these —
-   or a bare text button, which is just `.ghost` without a border. */
+/* ---------- shared buttons: quiet steel, one blaze action ---------- */
 
 .btn {
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 550;
   color: var(--text);
-  background: var(--panel-2);
+  background: linear-gradient(180deg, #1b241e, var(--ridge));
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.42rem 0.85rem;
+  border-radius: var(--rail-r);
+  padding: 0.5rem 0.95rem;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
 }
 
-.btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.btn:hover { border-color: var(--line-blaze); color: var(--blaze); box-shadow: 0 0 0 3px var(--blaze-soft); }
+.btn:active { transform: translateY(1px); }
 
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #17130a;
-  font-weight: 500;
+  background: linear-gradient(180deg, #f0609c, var(--blaze));
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: 650;
+  box-shadow: 0 6px 24px var(--blaze-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-.btn.primary:hover {
-  filter: brightness(1.1);
-}
+.btn.primary:hover { filter: brightness(1.07); color: #fff; }
 
 .btn.danger {
-  color: var(--danger);
-  border-color: var(--danger);
-  background: var(--danger-soft);
+  color: var(--ember);
+  border-color: rgba(228, 101, 95, 0.45);
+  background: var(--ember-soft);
 }
 
 .btn:disabled {
   color: var(--faint);
-  border-color: transparent;
-  background: none;
-  cursor: default;
+  border-color: var(--line);
+  background: transparent;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
-
 
 .ghost {
   font: inherit;
   font-size: 0.85rem;
   color: var(--muted);
-  background: none;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 0.42rem 0.6rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--rail-r);
+  padding: 0.45rem 0.65rem;
   cursor: pointer;
 }
 
-.ghost:hover {
-  color: var(--text);
-  background: var(--panel-2);
-}
+.ghost:hover { color: var(--text); background: rgba(234, 229, 211, 0.06); border-color: var(--line); }
 
+/* ---------- basecamp: the landing ---------- */
 
 #auth {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
+  min-height: 100dvh;
+  padding: 0 1.5rem;
 }
 
-#auth form,
-.auth-card {
-  width: min(360px, 100%);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 2rem;
+/* The landing page: a full-height hero, then the trail tour below.
+   One arrival motion on the hero — the rest is quiet on scroll. */
+.auth-stage {
+  width: min(1020px, 100%);
+  margin-inline: auto;
   display: grid;
-  gap: 0.9rem;
+  gap: clamp(3.5rem, 8vw, 6rem);
+  padding-bottom: 4rem;
+}
+
+.auth-hero {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  align-items: center;
+  align-content: center;
+  animation: arrive 0.55s var(--spring) both;
+}
+
+/* The setup-notice card rides the hero alone when keys are missing. */
+.auth-hero > .auth-card:only-child {
+  grid-column: 1 / -1;
+  width: min(560px, 100%);
+  margin-inline: auto;
+}
+
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+.auth-story {
+  display: grid;
+  gap: 1.15rem;
+  justify-items: start;
+  max-width: 34rem;
+}
+
+.auth-card {
+  background: linear-gradient(180deg, rgba(24, 33, 27, 0.97), rgba(16, 22, 19, 0.97));
+  border: 1px solid var(--line-strong);
+  border-radius: var(--glass-r);
+  padding: 1.9rem;
+  display: grid;
+  gap: 0.85rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-brand { display: flex; align-items: center; gap: 0.7rem; }
+
+/* The blaze mark: a trail blaze, not a logo blob. */
+.auth-mark {
+  width: 34px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  color: #fff;
+  background: linear-gradient(180deg, #f0609c, var(--blaze));
+  border-radius: 5px;
+  box-shadow: 0 0 26px var(--blaze-glow);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 #auth h1 {
   margin: 0;
-  font-family: var(--serif);
-  font-size: 1.9rem;
+  font-family: var(--sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* The story headline: the loudest type on the page. */
+.auth-story .tagline {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2.1rem, 4.6vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.032em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.auth-story .auth-intro { font-size: 1.08rem; max-width: 44ch; }
+
+.auth-story .auth-features { max-width: 30rem; width: 100%; }
+
+.auth-signin {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* The trail tour: six ledger rows in two columns. */
+.auth-tour {
+  display: grid;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: clamp(2rem, 5vw, 3.5rem);
+}
+
+.auth-tour h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+}
+
+.auth-tour-sub { margin: 0; color: var(--muted); font-size: 0.95rem; max-width: 52ch; }
+
+.tour-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 2rem;
+  margin-top: 0.8rem;
+}
+
+.tour-row {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.9rem 0.2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.tour-row > b {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 0.74rem;
   font-weight: 500;
-  letter-spacing: -0.01em;
+  color: var(--text);
+  background: rgba(234, 229, 211, 0.06);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  transform: translateY(2px);
 }
 
-#auth h1::after {
-  content: ".";
-  color: var(--accent);
+.tour-row:nth-child(3n + 1) > b { color: var(--blaze); border-color: var(--line-blaze); background: var(--blaze-soft); }
+.tour-row:nth-child(3n + 2) > b { color: var(--lichen); border-color: rgba(157, 184, 154, 0.35); background: var(--lichen-soft); }
+
+.tour-row h3 { margin: 0 0 0.25rem; font-size: 0.98rem; font-weight: 650; letter-spacing: -0.01em; }
+.tour-row p { margin: 0; font-size: 0.86rem; line-height: 1.6; color: var(--muted); }
+
+.tour-row .kbd-cluster { transform: translateY(3px); }
+
+/* The detail section: three plain columns, no boxes. */
+.auth-detail {
+  display: grid;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: clamp(2rem, 5vw, 3.5rem);
 }
 
-#auth .tagline {
-  margin: -0.4rem 0 0.6rem;
-  color: var(--muted);
-  font-size: 0.9rem;
+.auth-detail h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+  text-wrap: balance;
 }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem 2.2rem;
+  margin-top: 0.6rem;
+}
+
+.detail-cell { padding-top: 0.9rem; border-top: 2px solid var(--line-strong); }
+.detail-cell:nth-child(1) { border-top-color: var(--blaze); }
+.detail-cell:nth-child(2) { border-top-color: var(--lichen); }
+
+.detail-cell h3 { margin: 0 0 0.4rem; font-size: 1.02rem; font-weight: 650; letter-spacing: -0.015em; }
+.detail-cell p { margin: 0; font-size: 0.88rem; line-height: 1.65; color: var(--muted); }
+
+.auth-cta { justify-self: center; margin-top: 1.2rem; padding: 0.7rem 1.8rem; font-size: 0.92rem; }
+
+.auth-foot {
+  margin: 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--faint);
+}
+
+.auth-intro {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+/* Ledger rows, not cards: each trail gets a blaze tick. */
+.auth-features {
+  display: grid;
+  margin: 0.2rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+
+.auth-features div {
+  display: flex;
+  gap: 0.65rem;
+  align-items: baseline;
+  padding: 0.45rem 0.1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.auth-features div::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--blaze);
+  transform: translateY(2px);
+}
+
+.auth-features div:nth-child(2)::before { background: var(--lichen); }
+.auth-features div:nth-child(3)::before { background: var(--text-dim); }
+.auth-features b { color: var(--text); font-weight: 600; font-family: var(--mono); font-size: 0.78rem; }
+
+.auth-features .kbd-cluster { transform: translateY(2px); }
+
+#auth label { font-size: 0.82rem; font-weight: 600; color: var(--text-dim); }
 
 #auth input {
   font: inherit;
   color: var(--text);
-  background: var(--bg);
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  padding: 0.72rem 0.9rem;
+  width: 100%;
 }
 
-#auth input:focus {
-  outline: none;
-  border-color: var(--accent);
+#auth input:focus { outline: none; border-color: var(--blaze); box-shadow: 0 0 0 3px var(--blaze-soft); }
+#auth input::placeholder { color: var(--faint); }
+
+#auth button[type="submit"] {
+  font: inherit;
+  font-weight: 650;
+  background: linear-gradient(180deg, #f0609c, var(--blaze));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.72rem 1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 24px var(--blaze-glow);
 }
 
-#account {
+#auth button[type="submit"]:hover:not(:disabled) { filter: brightness(1.08); }
+#auth button[type="submit"]:disabled { opacity: 0.65; cursor: wait; }
+
+.auth-msg { min-height: 1.4em; margin: 0; font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+.auth-msg.error {
+  color: #ffc9c4;
+  background: var(--ember-soft);
+  border: 1px solid rgba(228, 101, 95, 0.4);
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+}
+.auth-msg.ok {
+  color: #cfe6cb;
+  background: var(--lichen-soft);
+  border: 1px solid rgba(157, 184, 154, 0.35);
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+}
+
+.auth-help, .auth-setup { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin: 0; }
+
+.auth-help code, .auth-setup code {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  background: rgba(234, 229, 211, 0.06);
+  border: 1px solid var(--line);
+  padding: 0.05em 0.35em;
+  border-radius: 5px;
+  color: var(--text-dim);
+}
+
+/* Sign-in steps: a real sequence, so plain numbering earns its place. */
+.auth-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  display: grid;
+  border-top: 1px solid var(--line);
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+
+.auth-steps li {
+  counter-increment: step;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
+  align-items: baseline;
+  padding: 0.45rem 0.1rem;
+  border-bottom: 1px solid var(--line);
 }
 
-#account span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.auth-steps li::before {
+  content: counter(step);
+  flex: none;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--blaze);
+  border: 1px solid var(--line-blaze);
+  background: var(--blaze-soft);
+  border-radius: 6px;
+  padding: 0.05rem 0.4rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -2px;
+  margin-right: 0.45rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- account strip ---------- */
+
+#account { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+#account span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 880px) {
+  #auth { padding: 0 1rem; }
+  .auth-hero { grid-template-columns: 1fr; gap: 2rem; min-height: 0; padding: 2.5rem 0 0; }
+  .auth-story { max-width: none; }
+  .tour-grid { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

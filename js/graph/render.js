@@ -5,31 +5,35 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 export function drawGraph(svg, graph, activeId, onOpen) {
   svg.replaceChildren();
 
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+  const sid = (v) => (v !== null && typeof v === "object" ? v.id : v);
+
   const neighbors = new Map();
   for (const e of graph.edges) {
-    push(neighbors, e.source, e.target);
-    push(neighbors, e.target, e.source);
+    push(neighbors, sid(e.source), sid(e.target));
+    push(neighbors, sid(e.target), sid(e.source));
   }
 
   for (const e of graph.edges) {
+    const a = byId.get(sid(e.source));
+    const b = byId.get(sid(e.target));
+    if (!a || !b) continue;
     const line = document.createElementNS(SVG_NS, "line");
-    const a = graph.nodes.find((n) => n.id === e.source);
-    const b = graph.nodes.find((n) => n.id === e.target);
     line.setAttribute("x1", a.x);
     line.setAttribute("y1", a.y);
     line.setAttribute("x2", b.x);
     line.setAttribute("y2", b.y);
     line.setAttribute("class", "edge");
-    line.dataset.source = e.source;
-    line.dataset.target = e.target;
+    line.dataset.source = sid(e.source);
+    line.dataset.target = sid(e.target);
     svg.append(line);
   }
 
   for (const n of graph.nodes) {
     const c = document.createElementNS(SVG_NS, "circle");
-    c.setAttribute("cx", n.x);
-    c.setAttribute("cy", n.y);
-    c.setAttribute("r", n.r);
+    c.setAttribute("cx", n.x ?? 0);
+    c.setAttribute("cy", n.y ?? 0);
+    c.setAttribute("r", n.r ?? 4);
     c.setAttribute("class", n.id === activeId ? "node active" : "node");
     c.dataset.id = n.id;
     const title = document.createElementNS(SVG_NS, "title");

@@ -1,40 +1,53 @@
-/* Design tokens. Everything visual keys off these — change a value here
-   and the whole app follows. */
+/* Waypoint survey tokens — boreal night, bone ink, one berry blaze.
+   Radii encode hierarchy: rails 10px, sheets 18px, instruments 22px. */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap");
 
 :root {
-  /* surfaces, darkest to lightest */
-  --bg: #101014;
-  --panel: #16161d;
-  --panel-2: #1c1c25;
-  --panel-3: #23232e;
+  /* terrain */
+  --night: #0d1310;
+  --ridge: #131a16;
+  --sheet: #18211b;
+  --sheet-deep: #101613;
+  --overlay: rgba(7, 10, 8, 0.72);
 
   /* strokes */
-  --line: #262631;
-  --line-strong: #33333f;
+  --line: rgba(234, 229, 211, 0.09);
+  --line-strong: rgba(234, 229, 211, 0.17);
+  --line-blaze: rgba(229, 72, 140, 0.45);
 
   /* ink */
-  --text: #e6e5e1;
-  --muted: #82818c;
-  --faint: #55545e;
+  --text: #eae5d3;
+  --text-dim: #c6c0a9;
+  --muted: #8a938a;
+  --faint: #5c665e;
 
-  /* the one color that gets to be loud */
-  --accent: #d9a53f;
-  --accent-soft: rgba(217, 165, 63, 0.12);
+  /* the one loud color: the trail blaze */
+  --blaze: #e5488c;
+  --blaze-ink: #2a0817;
+  --blaze-soft: rgba(229, 72, 140, 0.13);
+  --blaze-glow: rgba(229, 72, 140, 0.28);
 
-  /* feedback */
-  --danger: #e0564d;
-  --danger-soft: rgba(224, 86, 77, 0.12);
-  --ok: #58b98c;
+  /* survey crew: lichen marks the mapped, ember marks trouble */
+  --lichen: #9db89a;
+  --lichen-soft: rgba(157, 184, 154, 0.13);
+  --ember: #e4655f;
+  --ember-soft: rgba(228, 101, 95, 0.13);
 
-  /* type */
-  --sans: "Inter", system-ui, sans-serif;
-  --serif: "Newsreader", Georgia, serif;
-  --mono: "JetBrains Mono", ui-monospace, monospace;
+  /* type: grotesk surveys, serif reads, mono fixes coordinates */
+  --sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --serif: "Source Serif 4", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* shape + motion */
-  --radius: 8px;
-  --radius-sm: 6px;
-  --speed: 0.15s;
+  /* shape + motion: radii differ by layer on purpose */
+  --rail-r: 10px;
+  --sheet-r: 18px;
+  --glass-r: 22px;
+  --speed: 0.16s;
+  --spring: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 26px 70px rgba(0, 0, 0, 0.6);
 }

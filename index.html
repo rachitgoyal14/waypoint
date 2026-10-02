@@ -4,34 +4,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="waypoint — a networked note-taking app for the web: folders, wikilinks, backlinks, and a graph of your notes." />
+    <meta name="theme-color" content="#0d1310" />
     <title>waypoint</title>
 
-    <link rel="stylesheet" href="css/tokens.css" />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/components/sidebar.css" />
-    <link rel="stylesheet" href="css/components/editor.css" />
-    <link rel="stylesheet" href="css/components/graph.css" />
-    <link rel="stylesheet" href="css/components/modals.css" />
+    <link rel="icon" href="favicon.svg?v=11" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+    <link rel="stylesheet" href="css/tokens.css?v=11" />
+    <link rel="stylesheet" href="css/base.css?v=11" />
+    <link rel="stylesheet" href="css/layout.css?v=11" />
+    <link rel="stylesheet" href="css/components/sidebar.css?v=11" />
+    <link rel="stylesheet" href="css/components/editor.css?v=11" />
+    <link rel="stylesheet" href="css/components/graph.css?v=11" />
+    <link rel="stylesheet" href="css/components/modals.css?v=11" />
   </head>
   <body>
+    <div class="bg-terrain" aria-hidden="true"></div>
     <div id="auth"></div>
     <div id="app" style="display: none">
-
-      <aside id="sidebar"></aside>
-
-      <main id="editor"></main>
-
-      <aside id="panel">
-        <svg id="graph"></svg>
+      <aside id="sidebar" aria-label="Trailhead ledger"></aside>
+      <main id="editor" aria-label="Field sheet"></main>
+      <aside id="panel" aria-label="Survey map">
+        <svg id="graph" role="img" aria-label="Note link map"></svg>
         <div id="backlinks"></div>
       </aside>
-
     </div>
+    <noscript>
+      <div style="min-height:100vh;display:grid;place-items:center;font-family:system-ui;padding:2rem;text-align:center">
+        <p>waypoint needs JavaScript enabled to run.</p>
+      </div>
+    </noscript>
 
-    <script src="js/supabase/config.js"></script>
-    <script type="module" src="js/main.js"></script>
-    
+    <script src="js/supabase/config.js?v=11"></script>
+    <script type="module" src="js/main.js?v=11"></script>
   </body>
 </html>

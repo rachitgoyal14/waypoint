@@ -6,7 +6,7 @@
 
 create table if not exists public.notes (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   title text not null default 'Untitled',
   content text not null default '',
   folder_id uuid,
@@ -18,7 +18,7 @@ create table if not exists public.notes (
 
 create table if not exists public.folders (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   name text not null,
   parent_folder_id uuid references public.folders (id) on delete cascade
 );
@@ -52,6 +52,12 @@ create policy "own folders"
 
 -- Links belong to the owner of the source note; the target is any note
 -- the user can see, which for a single-user vault means their own.
+-- (Client code also stamps user_id explicitly on every insert, so writes
+-- work even on databases created before the auth.uid() defaults below.)
+
+-- If your tables predate the `default auth.uid()` on user_id, run once:
+--   alter table public.notes alter column user_id set default auth.uid();
+--   alter table public.folders alter column user_id set default auth.uid();
 create policy "own links"
   on public.note_links for all
   using (

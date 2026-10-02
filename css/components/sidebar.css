@@ -1,125 +1,144 @@
+/* The trailhead ledger: dense, flat, blaze-ticked. Radius stays 10px
+   here — the sheet and the glass earn the bigger curves. */
+
 #sidebar {
   display: flex;
   flex-direction: column;
-  padding: 0.9rem;
-  gap: 0.75rem;
+  padding: 0.85rem 0.8rem;
+  gap: 0.65rem;
   min-height: 0;
 }
-
-
-/* The account strip signs the top of the sidebar. */
 
 #account {
   flex: none;
   color: var(--muted);
-  font-size: 0.8rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--line);
+  font-size: 0.76rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--rail-r);
+  background: rgba(0, 0, 0, 0.25);
+  font-family: var(--mono);
 }
 
 #account button {
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid transparent;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.2rem 0.3rem;
-  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
-#account button:hover {
-  color: var(--danger);
+#account button:hover { color: var(--ember); background: var(--ember-soft); border-color: rgba(228,101,95,0.3); }
+
+/* Instrument tags: the only small tracked labels in the app. */
+.vault-label,
+#backlinks h3,
+.panel-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--faint);
 }
 
+.vault-label { padding: 0.25rem 0.3rem 0; }
 
-/* Toolbar: the primary actions, equal-width so the row stays calm. */
-
-#notesbar {
-  flex: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem;
-}
+/* Ledger actions: steel ticks, one blaze primary. */
+#notesbar { flex: none; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
 
 #notesbar button {
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.79rem;
+  font-weight: 600;
   color: var(--text);
-  background: var(--panel-2);
+  background: #1a221c;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.45rem 0.3rem;
+  border-radius: var(--rail-r);
+  padding: 0.55rem 0.3rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
-#notesbar button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+#notesbar button:first-child {
+  background: linear-gradient(180deg, #f0609c, var(--blaze));
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
+
+#notesbar button:first-child:hover { filter: brightness(1.08); color: #fff; }
+#notesbar button:not(:first-child):hover { border-color: var(--line-blaze); color: var(--blaze); }
+#notesbar button:active { transform: translateY(1px); }
 
 #notesbar button:disabled {
   color: var(--faint);
   border-color: var(--line);
-  background: none;
+  background: transparent;
   cursor: default;
+  transform: none;
 }
 
-
-#searchbox {
-  flex: none;
-}
+/* Search */
+#searchbox { flex: none; position: relative; }
 
 #searchbox input {
   width: 100%;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--text);
-  background: var(--bg);
+  background: rgba(0, 0, 0, 0.32);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 0.7rem;
+  border-radius: var(--rail-r);
+  padding: 0.6rem 2.6rem 0.6rem 0.8rem;
 }
 
-#searchbox input::placeholder {
+#searchbox input::placeholder { color: var(--faint); }
+#searchbox input:focus { outline: none; border-color: var(--blaze); box-shadow: 0 0 0 3px var(--blaze-soft); }
+
+#searchbox::after {
+  content: "⌘K";
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 0.68rem;
   color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.1rem 0.35rem;
+  background: rgba(234, 229, 211, 0.04);
+  pointer-events: none;
 }
 
-#searchbox input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-
-/* The tree gets the leftover height and does its own scrolling. */
-
+/* The trail list. */
 #folders {
   flex: 1;
-  min-height: 0;
+  min-height: 120px;
   overflow-y: auto;
   display: grid;
   gap: 1px;
   align-content: start;
-  margin: 0 -0.4rem;
-  padding: 0 0.4rem;
+  margin: 0 -0.3rem;
+  padding: 0.1rem 0.3rem 0.5rem;
 }
 
-#folders > .muted {
-  font-size: 0.85rem;
-  padding: 0.6rem 0.4rem;
-}
-
+#folders > .muted { font-size: 0.85rem; padding: 0.8rem 0.5rem; text-align: center; }
 
 #folders .folder-name {
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   background: none;
   border: none;
-  color: var(--text);
+  color: var(--text-dim);
   text-align: left;
-  padding: 0.34rem 0.4rem;
-  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.45rem;
+  border-radius: 7px;
   cursor: pointer;
   flex: 1;
   min-width: 0;
@@ -128,245 +147,203 @@
   white-space: nowrap;
 }
 
-#folders .folder-name:hover {
-  background: var(--panel-2);
-}
+#folders .folder-name:hover { background: rgba(234, 229, 211, 0.05); color: var(--text); }
 
-#folders .folder-head {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  border-radius: var(--radius-sm);
-}
+#folders .folder-head { display: flex; align-items: center; gap: 1px; border-radius: 7px; padding-right: 0.2rem; }
+#folders .folder-head:hover { background: rgba(234, 229, 211, 0.03); }
 
 #folders .folder-head .chev {
   background: none;
   border: none;
   color: var(--faint);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   cursor: pointer;
-  padding: 0.34rem 0.25rem;
+  padding: 0.4rem 0.3rem;
+  border-radius: 6px;
 }
 
-#folders .folder-head .chev:hover {
-  color: var(--text);
-}
+#folders .folder-head .chev:hover { color: var(--blaze); }
 
 #folders .folder-head .count {
   color: var(--faint);
-  font-size: 0.7rem;
-  padding: 0 0.25rem;
+  font-size: 0.68rem;
+  font-family: var(--mono);
+  background: rgba(234, 229, 211, 0.06);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  margin-left: 0.15rem;
 }
-
-
-/* Per-folder actions stay invisible until the row is hovered. */
 
 #folders .folder-head .mini {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: var(--faint);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.2rem 0.3rem;
-  border-radius: var(--radius-sm);
+  padding: 0.22rem 0.4rem;
+  border-radius: 6px;
   opacity: 0;
 }
 
-#folders .folder-head:hover .mini {
-  opacity: 1;
-}
-
-#folders .folder-head .mini:hover {
-  color: var(--accent);
-}
-
+#folders .folder-head:hover .mini, #folders .folder-head:focus-within .mini { opacity: 1; }
+#folders .folder-head .mini:hover { color: var(--blaze); background: var(--blaze-soft); border-color: var(--line-blaze); }
 
 #folders .folder-body {
-  margin-left: 0.85rem;
-  padding-left: 0.35rem;
+  margin-left: 0.8rem;
+  padding-left: 0.4rem;
   border-left: 1px solid var(--line);
   display: grid;
   gap: 1px;
   align-content: start;
 }
 
-#folders .folder-body.hidden {
-  display: none;
-}
+#folders .folder-body.hidden { display: none; }
 
-
-/* Note rows: quiet until hovered, accent-marked when active. */
-
-#folders .note-row {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  border-radius: var(--radius-sm);
-}
-
-#folders .note-row.in-folder {
-  margin-left: 0;
-}
+/* Note rows: the active trail carries the blaze chip. */
+#folders .note-row { display: flex; align-items: center; gap: 0.15rem; border-radius: 7px; }
 
 #folders .note-row > button:first-child {
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   flex: 1;
   min-width: 0;
   background: none;
-  border: none;
-  border-left: 2px solid transparent;
-  color: var(--text);
+  border: 1px solid transparent;
+  color: var(--text-dim);
   text-align: left;
-  padding: 0.34rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.42rem 0.55rem 0.42rem 0.8rem;
+  border-radius: 7px;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  position: relative;
 }
 
-#folders .note-row > button:first-child:hover {
-  background: var(--panel-2);
+#folders .note-row > button:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 16px;
+  border-radius: 2px;
+  background: transparent;
 }
+
+#folders .note-row > button:first-child:hover { background: rgba(234, 229, 211, 0.05); color: var(--text); }
 
 #folders .note-row > button.active {
-  background: var(--accent-soft);
-  border-left-color: var(--accent);
-  color: var(--accent);
+  background: var(--blaze-soft);
+  border-color: rgba(229, 72, 140, 0.3);
+  color: var(--blaze);
+  font-weight: 600;
 }
 
+#folders .note-row > button.active::before { background: var(--blaze); box-shadow: 0 0 8px var(--blaze-glow); }
 
-/* The move chips only matter while dragging; keep them out of the way
-   until the row is hovered. */
-
-#folders .note-row .moves {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  opacity: 0;
-}
-
-#folders .note-row:hover .moves {
-  opacity: 1;
-}
+#folders .note-row .moves { display: flex; flex-wrap: wrap; gap: 2px; opacity: 0; }
+#folders .note-row:hover .moves, #folders .note-row:focus-within .moves { opacity: 1; }
 
 #folders .note-row .move {
-  background: none;
-  border: none;
+  background: rgba(234,229,211,0.05);
+  border: 1px solid var(--line);
   color: var(--faint);
-  font-size: 0.68rem;
-  padding: 0.2rem 0.25rem;
-  border-radius: var(--radius-sm);
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 999px;
   cursor: pointer;
   white-space: nowrap;
 }
 
-#folders .note-row .move:hover {
-  color: var(--accent);
-}
+#folders .note-row .move:hover { color: var(--blaze); border-color: var(--line-blaze); }
 
-
-/* Bottom actions. */
-
-#today,
-#import {
+/* Foot of the ledger. */
+#today, #import {
   flex: none;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 600;
   text-align: center;
-  background: none;
+  background: transparent;
   border: 1px solid var(--line-strong);
-  color: var(--accent);
-  padding: 0.5rem 0.9rem;
-  border-radius: var(--radius-sm);
+  color: var(--lichen);
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--rail-r);
   cursor: pointer;
 }
 
-#today:hover,
-#import:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
+#today:hover, #import:hover { border-color: var(--lichen); background: var(--lichen-soft); }
 
 .dropzone {
   flex: none;
-  border: 1px dashed var(--line-strong);
-  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--rail-r);
   color: var(--faint);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   text-align: center;
-  padding: 0.55rem 0.5rem;
+  padding: 0.65rem 0.5rem;
   cursor: pointer;
 }
 
-.dropzone:hover,
-.dropzone.over {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.dropzone:hover, .dropzone.over { border-color: var(--blaze); color: var(--blaze); background: var(--blaze-soft); }
 
-
-/* Status + errors share one quiet strip at the bottom of the sidebar. */
-
-#noteerror,
-#importstatus {
+#noteerror, #importstatus {
   flex: none;
   margin: 0;
   font-size: 0.78rem;
   color: var(--muted);
-  padding: 0 0.2rem;
+  padding: 0 0.25rem;
   min-height: 1em;
+  line-height: 1.5;
 }
 
-#noteerror:empty,
-#importstatus:empty {
-  display: none;
-}
-
+#noteerror:empty, #importstatus:empty { display: none; }
 #noteerror:not(:empty) {
-  color: var(--danger);
+  color: #ffc9c4;
+  background: var(--ember-soft);
+  border: 1px solid rgba(228,101,95,0.35);
+  border-radius: var(--rail-r);
+  padding: 0.5rem 0.65rem;
 }
 
+/* Backlinks, surveyed. */
+#backlinks { padding: 1rem; }
+#backlinks h3 { margin: 0 0 0.6rem; }
 
-/* Backlinks half of the right panel. */
-
-#backlinks {
-  padding: 0.9rem;
-}
-
-#backlinks h3 {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--faint);
-  margin: 0 0 0.5rem;
-}
-
-#backlinks-list {
-  display: grid;
-  gap: 1px;
-}
+#backlinks-list { display: grid; gap: 3px; }
+#backlinks-list .muted { font-size: 0.84rem; line-height: 1.6; }
 
 #backlinks-list button {
   font: inherit;
-  font-size: 0.85rem;
-  background: none;
-  border: none;
-  border-left: 2px solid transparent;
-  color: var(--text);
+  font-size: 0.86rem;
+  background: rgba(234,229,211,0.03);
+  border: 1px solid var(--line);
+  color: var(--text-dim);
   text-align: left;
-  padding: 0.34rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.65rem 0.5rem 0.9rem;
+  border-radius: 7px;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  position: relative;
 }
 
-#backlinks-list button:hover {
-  background: var(--panel-2);
-  border-left-color: var(--accent);
-  color: var(--accent);
+#backlinks-list button::before {
+  content: "";
+  position: absolute;
+  left: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--lichen);
 }
+
+#backlinks-list button:hover { color: var(--blaze); background: var(--blaze-soft); border-color: var(--line-blaze); }
+#backlinks-list button:hover::before { background: var(--blaze); }
