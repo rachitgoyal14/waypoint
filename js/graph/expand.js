@@ -34,7 +34,8 @@ export function initGraphOverlay({ build, activeId, onOpen }) {
       drawGraph(svg, graph, activeId(), onOpen);
     });
     label.textContent = "Vault graph";
-    count.textContent = `${graph.nodes.length} notes · ${graph.edges.length} trails`;
+    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    count.textContent = `${plural(graph.nodes.length, "note", "notes")} · ${plural(graph.edges.length, "trail", "trails")}`;
     backdrop.classList.add("open");
   };
 

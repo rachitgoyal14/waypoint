@@ -26,10 +26,13 @@ export function saveNote(id, title, content) {
 }
 
 export function getNoteByTitle(title) {
+  // Case-insensitive like the local byTitle match: without this, [[RACHIT]]
+  // misses an existing "rachit" note and a duplicate-titled note gets created.
+  const pattern = String(title).replace(/[%_\\]/g, (c) => `\\${c}`);
   return supabase
     .from("notes")
     .select("*")
-    .eq("title", title)
+    .ilike("title", pattern)
     .limit(1);
 }
 

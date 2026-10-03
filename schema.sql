@@ -27,10 +27,27 @@ create index if not exists notes_user_idx on public.notes (user_id);
 create index if not exists notes_folder_idx on public.notes (folder_id);
 create index if not exists folders_user_idx on public.folders (user_id);
 create index if not exists note_links_target_idx on public.note_links (target_note_id);
+create unique index if not exists notes_daily_unique on public.notes (user_id, title) where is_daily;
+
+update public.notes set folder_id = null where folder_id is not null and folder_id not in (select id from public.folders);
+
+alter table public.notes drop constraint if exists notes_folder_id_fkey;
+
+alter table public.notes add constraint notes_folder_id_fkey foreign key (folder_id) references public.folders (id) on delete set null;
+
+create or replace function public.touch_updated_at() returns trigger as $$ begin new.updated_at = now(); return new; end; $$ language plpgsql;
+
+drop trigger if exists notes_touch on public.notes;
+
+create trigger notes_touch before update on public.notes for each row execute function public.touch_updated_at();
 
 alter table public.notes enable row level security;
 alter table public.folders enable row level security;
 alter table public.note_links enable row level security;
+
+drop policy if exists "own notes" on public.notes;
+drop policy if exists "own folders" on public.folders;
+drop policy if exists "own links" on public.note_links;
 
 create policy "own notes"
   on public.notes for all

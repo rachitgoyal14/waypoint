@@ -11,16 +11,17 @@ from a CDN for markdown.
 
 ## Project showcase
 
-| Landing | Note editor |
+| Landing page | Trail tour |
 | --- | --- |
-| ![Waypoint landing page](screenshots/landing-hero.png) | ![Note editor with sidebar and backlinks](screenshots/app-editor.png) |
+| ![Waypoint landing page with sign-in](screenshots/landing-hero.png) | ![Trail tour section of the landing page](screenshots/landing-tour.png) |
 
-| Vault graph overlay | Jump-to-note palette |
+| App dashboard | Vault graph overlay |
 | --- | --- |
-| ![Expanded vault graph](screenshots/app-graph.png) | ![Command palette](screenshots/app-palette.png) |
+| ![Note editor with sidebar, folders, and backlinks](screenshots/dashboard.png) | ![Expanded vault graph showing linked notes](screenshots/vault-graph.png) |
 
-To add your own screenshots, save PNG files under `screenshots/` with these names:
-`landing-hero.png`, `app-editor.png`, `app-graph.png`, `app-palette.png`.
+| Quick search palette | Full landing page |
+| --- | --- |
+| ![Jump-to-note palette opened with Cmd K](screenshots/quickSearchThroughCmdK.png) | ![Full scrollable landing page](screenshots/landing-full.png) |
 
 ## Features
 

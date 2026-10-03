@@ -1,4 +1,4 @@
-import { extractWikilinks } from "../editor/markdown.js";
+import { extractWikilinks, extractTags } from "../editor/markdown.js";
 import { createNote, saveNote, getNoteByTitle, setTags } from "../supabase/notes.js";
 import { replaceLinks } from "../supabase/links.js";
 
@@ -44,7 +44,7 @@ function titleFrom(name) {
 async function syncBatch(imported) {
   for (const n of imported) {
     const content = n.content || "";
-    await setTags(n.id, extractTagsLoose(content));
+    await setTags(n.id, extractTags(content));
 
     const targets = [];
     for (const title of extractWikilinks(content)) {
@@ -64,12 +64,4 @@ async function syncBatch(imported) {
 
 function findTarget(title, imported) {
   return imported.find((x) => x.title.toLowerCase() === title.toLowerCase());
-}
-
-function extractTagsLoose(content) {
-  const found = new Set();
-  for (const m of content.matchAll(/(^|\s)#([a-zA-Z][\w-]*)/g)) {
-    found.add(m[2].toLowerCase());
-  }
-  return [...found];
 }

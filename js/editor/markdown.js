@@ -17,14 +17,26 @@ export function extractTags(text) {
 export function extractWikilinks(text) {
   const found = [];
   for (const [, title] of (text || "").matchAll(WIKILINK)) {
-    found.push(title.trim());
+    // Skip empties ([[ ]]) so saves never mint empty-titled stub notes.
+    const t = title.trim();
+    if (t) found.push(t);
   }
   return found;
+}
+
+function sanitize(host) {
+  host.querySelectorAll("script, iframe, object, embed, link, style").forEach((n) => n.remove());
+  for (const n of host.querySelectorAll("*")) {
+    for (const a of [...n.attributes]) {
+      if (a.name.toLowerCase().startsWith("on")) n.removeAttribute(a.name);
+    }
+  }
 }
 
 export function renderMarkdown(text, { onOpenLink } = {}) {
   const host = el("div", "preview");
   host.innerHTML = marked.parse(text || "", { gfm: true, breaks: true }); // marked's output, never raw user strings
+  sanitize(host);
 
   addHighlights(host);
   addTags(host);

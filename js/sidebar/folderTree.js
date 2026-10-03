@@ -10,7 +10,10 @@ export function isOpen(id) {
 export function renderFolderTree(root, folders, notes, activeId, onPick, onNewNoteIn, onRename, onDelete, onMoveNote) {
   root.textContent = "";
 
-  const rootNotes = notes.filter((n) => !n.folder_id);
+  // Notes whose folder no longer exists (deleted before the FK guard) read
+  // as root notes instead of vanishing from the tree entirely.
+  const folderIds = new Set(folders.map((f) => f.id));
+  const rootNotes = notes.filter((n) => !n.folder_id || !folderIds.has(n.folder_id));
   if (!folders.length && !rootNotes.length) {
     root.append(el("p", "muted", "No notes yet — write one."));
     return;

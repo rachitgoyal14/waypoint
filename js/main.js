@@ -618,7 +618,12 @@ async function openNote(id) {
   app.classList.remove("notes-open", "panel-open");
   if (id === currentId) return;
   if (editor.isDirty()) {
-    const choice = confirm("Save changes before switching?\n\nOK = save and switch, Cancel = discard and switch.");
+    // Dismissing keeps the same meaning as the old native prompt:
+    // confirm saves and switches, anything else discards and switches.
+    const choice = await confirmDialog("Save changes before switching?", {
+      title: "Unsaved changes",
+      confirmText: "Save and switch",
+    });
     if (choice) {
       const ok = await editor.flush();
       if (!ok) return;
