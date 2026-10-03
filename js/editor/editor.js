@@ -1,5 +1,5 @@
 import { el } from "../utils/dom.js";
-import { renderMarkdown } from "./markdown.js";
+import { renderMarkdown, continueList, startTask, toggleTaskInText } from "./markdown.js";
 
 export function initEditor(root, { onSave, onOpenLink }) {
   const bar = el("div");
@@ -26,13 +26,45 @@ export function initEditor(root, { onSave, onOpenLink }) {
 
   const drawPreview = () => {
     if (!previewOn) return;
-    preview.replaceChildren(renderMarkdown(body.value, { onOpenLink }));
+    preview.replaceChildren(renderMarkdown(body.value, { onOpenLink, onToggleTask: flipTask }));
   };
+
+  function flipTask(index) {
+    const next = toggleTaskInText(body.value, index);
+    if (!next.changed) return;
+    body.value = next.text;
+    markDirty();
+    drawPreview();
+  }
+
+  function applyEdit(edit) {
+    body.value = edit.text;
+    body.selectionStart = body.selectionEnd = edit.caret;
+    markDirty();
+    drawPreview();
+  }
 
   body.oninput = () => {
     markDirty();
     drawPreview();
   };
+
+  body.addEventListener("keydown", (e) => {
+    const plain = !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey;
+    if (e.key === "Enter" && plain) {
+      const edit = continueList(body.value, body.selectionStart, body.selectionEnd);
+      if (edit) {
+        e.preventDefault();
+        applyEdit(edit);
+      }
+    } else if (e.key === " " && plain && body.selectionStart === body.selectionEnd) {
+      const edit = startTask(body.value, body.selectionStart);
+      if (edit) {
+        e.preventDefault();
+        applyEdit(edit);
+      }
+    }
+  });
 
   const toggle = el("button", "", "Preview");
   toggle.onclick = () => {

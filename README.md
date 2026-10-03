@@ -25,8 +25,9 @@ from a CDN for markdown.
 
 ## Features
 
-- **Notes** — create, edit, delete, with an explicit save (Cmd/Ctrl+S) and an unsaved-changes guard.
-- **Markdown** — CommonMark + GFM via `marked`, with `#tag` pills, `==highlights==`, and `> [!note]` callouts rendered on top.
+- **Notes** — create, edit, delete, with an explicit save (Cmd/Ctrl+S) and an unsaved-changes guard. Ordered lists auto-number on Enter; empty items exit the list.
+- **Markdown** — CommonMark + GFM via `marked`, headings at every level, `#tag` pills, `==highlights==`, and `> [!note]` callouts rendered on top.
+- **Checklists** — `- [ ]` tasks continue on Enter, `[]` plus space becomes a task, and preview checkboxes toggle the note itself when clicked.
 - **Wikilinks** — `[[Some Note]]` renders as a link; clicking it opens that note, creating a stub if it doesn't exist yet. Links are stored in a `note_links` table on save.
 - **Backlinks** — the right panel lists everything that links to the note you're reading.
 - **Folders** — nested tree in the sidebar, drag notes between folders, rename and delete.

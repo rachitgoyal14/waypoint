@@ -1,12 +1,47 @@
-import { el } from "../utils/dom.js";
-
 const SVG_NS = "http://www.w3.org/2000/svg";
+
+let tip = null;
+
+function getTip() {
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.className = "graph-tip";
+    tip.hidden = true;
+    document.body.append(tip);
+  }
+  return tip;
+}
+
+export function hideTip() {
+  if (tip) tip.hidden = true;
+}
+
+function showTip(text, x, y) {
+  const t = getTip();
+  t.textContent = text;
+  t.hidden = false;
+  moveTip(x, y);
+}
+
+function moveTip(x, y) {
+  const t = getTip();
+  const gap = 14;
+  const w = t.offsetWidth;
+  const h = t.offsetHeight;
+  let left = x + gap;
+  let top = y + gap;
+  if (left + w > window.innerWidth - 8) left = x - w - gap;
+  if (top + h > window.innerHeight - 8) top = y - h - gap;
+  t.style.left = left + "px";
+  t.style.top = top + "px";
+}
+
+const sid = (v) => (v !== null && typeof v === "object" ? v.id : v);
 
 export function drawGraph(svg, graph, activeId, onOpen) {
   svg.replaceChildren();
 
   const byId = new Map(graph.nodes.map((n) => [n.id, n]));
-  const sid = (v) => (v !== null && typeof v === "object" ? v.id : v);
 
   const neighbors = new Map();
   for (const e of graph.edges) {
@@ -19,10 +54,10 @@ export function drawGraph(svg, graph, activeId, onOpen) {
     const b = byId.get(sid(e.target));
     if (!a || !b) continue;
     const line = document.createElementNS(SVG_NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
+    line.setAttribute("x1", a.x ?? 0);
+    line.setAttribute("y1", a.y ?? 0);
+    line.setAttribute("x2", b.x ?? 0);
+    line.setAttribute("y2", b.y ?? 0);
     line.setAttribute("class", "edge");
     line.dataset.source = sid(e.source);
     line.dataset.target = sid(e.target);
@@ -36,14 +71,22 @@ export function drawGraph(svg, graph, activeId, onOpen) {
     c.setAttribute("r", n.r ?? 4);
     c.setAttribute("class", n.id === activeId ? "node active" : "node");
     c.dataset.id = n.id;
-    const title = document.createElementNS(SVG_NS, "title");
-    title.textContent = n.title || "Untitled";
-    c.append(title);
     if (onOpen) {
+      const label = n.title || "Untitled";
       c.style.cursor = "pointer";
-      c.addEventListener("click", () => onOpen(n.id));
-      c.addEventListener("mouseenter", () => highlight(svg, n.id, neighbors));
-      c.addEventListener("mouseleave", () => highlight(svg, null, neighbors));
+      c.addEventListener("click", () => {
+        hideTip();
+        onOpen(n.id);
+      });
+      c.addEventListener("mouseenter", (ev) => {
+        highlight(svg, n.id, neighbors);
+        showTip(label, ev.clientX, ev.clientY);
+      });
+      c.addEventListener("mousemove", (ev) => moveTip(ev.clientX, ev.clientY));
+      c.addEventListener("mouseleave", () => {
+        highlight(svg, null, neighbors);
+        hideTip();
+      });
     }
     svg.append(c);
   }
@@ -51,9 +94,6 @@ export function drawGraph(svg, graph, activeId, onOpen) {
   fitView(svg, graph.nodes);
 }
 
-
-// Size the viewBox to the settled layout so nothing clips at the edges.
-// A square box keeps the circles circular in the short, wide mini panel.
 function fitView(svg, nodes) {
   if (!nodes.length) {
     svg.setAttribute("viewBox", "-100 -100 200 200");

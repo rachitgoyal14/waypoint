@@ -1,5 +1,5 @@
-import { el, qs } from "../utils/dom.js";
-import { drawGraph } from "./render.js";
+import { el } from "../utils/dom.js";
+import { drawGraph, hideTip } from "./render.js";
 import { runSimulation } from "./simulation.js";
 
 export function initGraphOverlay({ build, activeId, onOpen }) {
@@ -17,7 +17,11 @@ export function initGraphOverlay({ build, activeId, onOpen }) {
   box.append(head, svg);
   backdrop.append(box);
 
-  const close = () => backdrop.classList.remove("open");
+  const close = () => {
+    hideTip();
+    backdrop.classList.remove("open");
+  };
+
   const open = () => {
     const graph = build();
     if (!graph.nodes.length) {
@@ -28,8 +32,6 @@ export function initGraphOverlay({ build, activeId, onOpen }) {
       backdrop.classList.add("open");
       return;
     }
-    // The mini panel positions its nodes through the simulation; the
-    // overlay used to skip that step and drew every node at undefined.
     runSimulation(graph.nodes, graph.edges, () => {
       drawGraph(svg, graph, activeId(), onOpen);
     });

@@ -17,11 +17,58 @@ export function extractTags(text) {
 export function extractWikilinks(text) {
   const found = [];
   for (const [, title] of (text || "").matchAll(WIKILINK)) {
-    // Skip empties ([[ ]]) so saves never mint empty-titled stub notes.
     const t = title.trim();
     if (t) found.push(t);
   }
   return found;
+}
+
+export function continueList(text, start, end) {
+  if (start !== end) return null;
+  const head = text.slice(0, start);
+  const sol = head.lastIndexOf("\n") + 1;
+  const prefix = head.slice(sol);
+  const tail = text.slice(start);
+  const eol = tail.indexOf("\n");
+  const suffix = eol === -1 ? tail : tail.slice(0, eol);
+  const rest = eol === -1 ? "" : tail.slice(eol);
+  const m = prefix.match(/^(\s*)(?:(\d+)\.|([-*+]))(\s+\[[ xX]\])?(\s*)(.*)$/);
+  if (!m) return null;
+  const indent = m[1];
+  if (!((m[6] || "") + suffix).trim()) {
+    const out = head.slice(0, sol) + indent + "\n" + tail;
+    return { text: out, caret: sol + indent.length + 1 };
+  }
+  const marker = m[2] ? `${parseInt(m[2], 10) + 1}.` : m[3];
+  const insert = `\n${indent}${marker}${m[4] ? " [ ]" : ""} `;
+  return { text: head + insert + suffix + rest, caret: head.length + insert.length };
+}
+
+export function startTask(text, pos) {
+  const head = text.slice(0, pos);
+  const sol = head.lastIndexOf("\n") + 1;
+  const m = head.slice(sol).match(/^(\s*)\[\]$/);
+  if (!m) return null;
+  const insert = `${m[1]}- [ ] `;
+  return { text: head.slice(0, sol) + insert + text.slice(pos), caret: sol + insert.length };
+}
+
+export function toggleTaskInText(text, index) {
+  const lines = text.split("\n");
+  let fence = false;
+  let seen = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*```/.test(lines[i])) fence = !fence;
+    if (fence) continue;
+    const m = lines[i].match(/^(\s*(?:[-*+]|\d+\.)\s+)\[([ xX])\]/);
+    if (!m) continue;
+    seen += 1;
+    if (seen === index) {
+      lines[i] = lines[i].replace(/\[([ xX])\]/, `[${m[2].toLowerCase() === "x" ? " " : "x"}]`);
+      return { text: lines.join("\n"), changed: true };
+    }
+  }
+  return { text, changed: false };
 }
 
 function sanitize(host) {
@@ -33,14 +80,15 @@ function sanitize(host) {
   }
 }
 
-export function renderMarkdown(text, { onOpenLink } = {}) {
+export function renderMarkdown(text, { onOpenLink, onToggleTask } = {}) {
   const host = el("div", "preview");
-  host.innerHTML = marked.parse(text || "", { gfm: true, breaks: true }); // marked's output, never raw user strings
+  host.innerHTML = marked.parse(text || "", { gfm: true, breaks: true });
   sanitize(host);
 
   addHighlights(host);
   addTags(host);
   addWikilinks(host, onOpenLink);
+  addTasks(host, onToggleTask);
   addCallouts(host);
   return host;
 }
@@ -72,6 +120,20 @@ function addWikilinks(host, onOpenLink) {
   }
 }
 
+function addTasks(host, onToggleTask) {
+  if (!onToggleTask) return;
+  let idx = -1;
+  for (const box of host.querySelectorAll('li > input[type="checkbox"]')) {
+    idx += 1;
+    const i = idx;
+    box.disabled = false;
+    box.addEventListener("click", (e) => {
+      e.preventDefault();
+      onToggleTask(i);
+    });
+  }
+}
+
 function addHighlights(host) {
   for (const node of textNodes(host)) {
     const s = node.textContent;
@@ -96,7 +158,7 @@ function addTags(host) {
 
 function swapHtml(node, html) {
   const span = document.createElement("span");
-  span.innerHTML = html; // escapes applied above, tags/mark written by this file
+  span.innerHTML = html;
   node.replaceWith(span);
   return span;
 }
@@ -109,7 +171,7 @@ function escaped(s) {
 
 function unescaped(s) {
   const d = el("div");
-  d.innerHTML = s; // entity-only text: escaped() left no real tags to parse
+  d.innerHTML = s;
   return d.textContent;
 }
 

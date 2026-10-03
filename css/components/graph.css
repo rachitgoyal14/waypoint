@@ -1,5 +1,3 @@
-/* The survey instrument: contour field, blaze fixes, lichen drift. */
-
 .panel-section { padding: 0.9rem; border-bottom: 1px solid var(--line); }
 
 .panel-label {
@@ -76,7 +74,26 @@
 
 #graph-expand:hover { color: var(--blaze); background: var(--blaze-soft); }
 
-/* Full-survey glass. */
+.graph-tip {
+  position: fixed;
+  z-index: 90;
+  max-width: 240px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(18, 24, 20, 0.96);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-tip[hidden] { display: none; }
+
 .graph-overlay {
   display: none;
   position: fixed;

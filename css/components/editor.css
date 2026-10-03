@@ -150,10 +150,13 @@
 #preview.on { display: block; animation: fadein 0.25s var(--spring); }
 @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-#preview h1, #preview h2, #preview h3 { font-family: var(--sans); letter-spacing: -0.02em; line-height: 1.25; margin: 1.3em 0 0.45em; color: var(--text); }
+#preview h1, #preview h2, #preview h3, #preview h4, #preview h5, #preview h6 { font-family: var(--sans); letter-spacing: -0.02em; line-height: 1.25; margin: 1.3em 0 0.45em; color: var(--text); }
 #preview h1 { font-size: 1.6rem; font-weight: 700; }
 #preview h2 { font-size: 1.32rem; font-weight: 650; }
 #preview h3 { font-size: 1.08rem; font-weight: 600; }
+#preview h4 { font-size: 0.98rem; font-weight: 650; }
+#preview h5 { font-size: 0.88rem; font-weight: 650; }
+#preview h6 { font-size: 0.8rem; font-weight: 650; }
 #preview p { margin: 0.65em 0; }
 #preview a { color: var(--blaze); text-decoration-color: rgba(229,72,140,0.45); text-underline-offset: 3px; }
 #preview a:hover { text-decoration-color: var(--blaze); }
@@ -189,7 +192,9 @@
 #preview th, #preview td { border: 1px solid var(--line-strong); padding: 0.45em 0.8em; text-align: left; }
 #preview th { background: rgba(234,229,211,0.05); font-size: 0.78rem; letter-spacing: 0.04em; }
 #preview hr { border: none; border-top: 1px solid var(--line-strong); margin: 1.6em auto; width: 40%; }
-#preview input[type="checkbox"] { accent-color: var(--blaze); width: 1em; height: 1em; }
+#preview input[type="checkbox"] { accent-color: var(--blaze); width: 1em; height: 1em; cursor: pointer; }
+#preview li:has(> input[type="checkbox"]) { list-style: none; }
+#preview li > input[type="checkbox"] { margin-right: 0.35em; vertical-align: -0.12em; }
 #preview ul, #preview ol { padding-left: 1.5em; margin: 0.65em 0; }
 #preview li::marker { color: var(--blaze); }
 #preview mark { background: linear-gradient(180deg, transparent 55%, rgba(229,72,140,0.45) 55%); color: inherit; padding: 0 0.1em; }
